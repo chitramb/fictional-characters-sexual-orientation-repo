@@ -12,7 +12,6 @@ Build a deduplicated repository of at least 15,000 fictional-character entities,
 
 ### Tier 2 — work metadata and cross-checks
 - **Wikipedia and specialist bibliographies** may be used for title metadata, dates, countries and corroboration after broad character discovery, but LGBTQ-only lists and queer-specialist databases are excluded from the main candidate collection to avoid source-selection bias.
-- **LGBT Fans Deserve Better (LGBTFansDB)**: historical/archived television-character identifiers are represented in Wikidata by P6780. Treat this as an identifier/crosswalk, not a current independently verified identity claim.
 - **Specialist scholarship and published reference works**: use for historical characters and periods where modern structured databases are sparse. Capture bibliographic citation and page/section, not just a search-result snippet.
 
 ### Tier 3 — work metadata and entity resolution
@@ -55,7 +54,5 @@ A larger sample does not automatically become representative. The source ecosyst
 - Queerlit project overview: https://ecp.ep.liu.se/index.php/hic/article/download/889/797/909
 - LezWatch character statistics docs: https://docs.lezwatchtv.com/api/statistics/characters/
 - Wikidata WikiProject LGBT models: https://www.wikidata.org/wiki/Wikidata:WikiProject_LGBT/Models
-- Wikipedia LGBTQ fiction lists: https://en.wikipedia.org/wiki/Lists_of_LGBTQ_figures_in_fiction_and_myth
-- Modern written fiction list: https://en.wikipedia.org/wiki/List_of_LGBTQ_characters_in_modern_written_fiction
 - IMDb non-commercial data terms/docs: https://data.imdb.com/documentation
 - TMDB daily ID exports: https://developer.themoviedb.org/docs/daily-id-exports
