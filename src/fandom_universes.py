@@ -49,6 +49,38 @@ UNIVERSES = [
     ("RWBY", "https://rwby.fandom.com/api.php", "Animation", "RWBY"),
     ("Hazbin Hotel", "https://hazbinhotel.fandom.com/api.php", "Animation", "Hazbin Hotel"),
     ("Gundam", "https://gundam.fandom.com/api.php", "Animation", "Mobile Suit Gundam"),
+    ("Percy Jackson", "https://riordan.fandom.com/api.php", "Book/film/TV", "Percy Jackson"),
+    ("The Hunger Games", "https://thehungergames.fandom.com/api.php", "Book/film", "The Hunger Games"),
+    ("Twilight", "https://twilightsaga.fandom.com/api.php", "Book/film", "The Twilight Saga"),
+    ("The Chronicles of Narnia", "https://narnia.fandom.com/api.php", "Book/film", "The Chronicles of Narnia"),
+    ("His Dark Materials", "https://hisdarkmaterials.fandom.com/api.php", "Book/TV", "His Dark Materials"),
+    ("Moomin", "https://moomin.fandom.com/api.php", "Book/animation", "Moomin"),
+    ("Sailor Moon", "https://sailormoon.fandom.com/api.php", "Manga/animation", "Sailor Moon"),
+    ("JoJo's Bizarre Adventure", "https://jojo.fandom.com/api.php", "Manga/animation", "JoJo's Bizarre Adventure"),
+    ("Death Note", "https://deathnote.fandom.com/api.php", "Manga/animation", "Death Note"),
+    ("Attack on Titan", "https://attackontitan.fandom.com/api.php", "Manga/animation", "Attack on Titan"),
+    ("My Hero Academia", "https://myheroacademia.fandom.com/api.php", "Manga/animation", "My Hero Academia"),
+    ("Fairy Tail", "https://fairytail.fandom.com/api.php", "Manga/animation", "Fairy Tail"),
+    ("Demon Slayer", "https://kimetsu-no-yaiba.fandom.com/api.php", "Manga/animation", "Demon Slayer"),
+    ("Genshin Impact", "https://genshin-impact.fandom.com/api.php", "Video game", "Genshin Impact"),
+    ("Honkai: Star Rail", "https://honkai-star-rail.fandom.com/api.php", "Video game", "Honkai: Star Rail"),
+    ("The Elder Scrolls", "https://elderscrolls.fandom.com/api.php", "Video game", "The Elder Scrolls"),
+    ("Fallout", "https://fallout.fandom.com/api.php", "Video game", "Fallout"),
+    ("Elden Ring", "https://eldenring.fandom.com/api.php", "Video game", "Elden Ring"),
+    ("Minecraft", "https://minecraft.fandom.com/api.php", "Video game", "Minecraft"),
+    ("Sonic the Hedgehog", "https://sonic.fandom.com/api.php", "Video game/animation", "Sonic the Hedgehog"),
+    ("Mario", "https://mario.fandom.com/api.php", "Video game", "Super Mario"),
+    ("SpongeBob SquarePants", "https://spongebob.fandom.com/api.php", "Animation", "SpongeBob SquarePants"),
+    ("Gravity Falls", "https://gravityfalls.fandom.com/api.php", "Animation", "Gravity Falls"),
+    ("Regular Show", "https://regularshow.fandom.com/api.php", "Animation", "Regular Show"),
+    ("The Owl House", "https://theowlhouse.fandom.com/api.php", "Animation", "The Owl House"),
+    ("Amphibia", "https://amphibia.fandom.com/api.php", "Animation", "Amphibia"),
+    ("Rick and Morty", "https://rickandmorty.fandom.com/api.php", "Animation", "Rick and Morty"),
+    ("Merlin", "https://merlin.fandom.com/api.php", "TV", "Merlin"),
+    ("Downton Abbey", "https://downtonabbey.fandom.com/api.php", "TV", "Downton Abbey"),
+    ("James Bond", "https://jamesbond.fandom.com/api.php", "Film/book", "James Bond"),
+    ("Dune", "https://dune.fandom.com/api.php", "Book/film/TV", "Dune"),
+    ("Warhammer 40,000", "https://warhammer40k.fandom.com/api.php", "Tabletop/game/fiction", "Warhammer 40,000"),
 ]
 HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.7 (universe-first open research)"}
 ORIENTATION_VALUES = (
@@ -99,7 +131,7 @@ def _character_categories(session, api):
         params.update(cont)
     # Prioritize the broad category itself and then subcategories with likely character pages.
     return sorted(set(found), key=lambda x: (0 if x.casefold() in
-                   ("characters", "fictional characters", "main characters") else 1, x.casefold()))[:35]
+                   ("characters", "fictional characters", "main characters") else 1, x.casefold()))[:100]
 
 def _category_pages(session, api, category, max_depth=2):
     queue = [(category, 0)]
