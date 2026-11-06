@@ -8,6 +8,7 @@ FILES = (
     "lezwatch_characters.jsonl",
     "wikidata_lgbtq_candidates.jsonl",
     "wikipedia_list_candidates.jsonl",
+    "community_wiki_candidates.jsonl",
 )
 
 def norm(value: str) -> str:
