@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: neutral-universe-first-ingestion
+  group: supplementary-character-ingestion
   cancel-in-progress: true
 
 jobs:
