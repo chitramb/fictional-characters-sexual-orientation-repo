@@ -29,20 +29,29 @@ jobs:
         run: pip install -r requirements.txt
       - name: Fetch supplementary source candidates
         run: python -m src.ingest_sources --source all
+      - name: Merge available checkpoints
+        if: always()
+        run: python -m src.merge_candidates
       - name: Persist character dictionary to repository
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-          git add -f data/processed/character_dictionary.jsonl data/processed/collection_summary.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Refresh universe-first fictional character dictionary"
-            git push
+          if [ -f data/processed/character_dictionary.jsonl ] && [ -f data/processed/collection_summary.json ]; then
+            git pull --rebase origin main
+            git add -f data/processed/character_dictionary.jsonl data/processed/collection_summary.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Refresh universe-first fictional character dictionary"
+              git push
+            fi
+          else
+            echo "No completed checkpoint available to persist."
           fi
       - name: Upload source-preserving candidate data
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: supplementary-character-candidates-${{ github.run_number }}
           path: data/raw/supplementary/*
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
