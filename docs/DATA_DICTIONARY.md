@@ -1,7 +1,8 @@
 # Data dictionary
 
-## character_work_records.csv
+## Existing Wikidata outputs
 
+### character_work_records.csv
 | Field | Meaning |
 |---|---|
 | character_qid | Wikidata item identifier for the fictional character |
@@ -14,28 +15,32 @@
 | country_label | English country label |
 | channel | movies, tv_web_series, or books |
 
-The same character may have more than one row because they can appear in multiple works, countries, or publication-date statements. This table is a relationship table, not a unique-character table.
-
-## yearly_counts.csv
-
+### yearly_counts.csv
 | Field | Meaning |
 |---|---|
 | year | Calendar year, inclusive 1900–2026 by default |
 | channel | One of the three media categories |
-| character_count | Number of distinct character QIDs linked to eligible works in that year and channel |
+| character_count | Distinct character QIDs linked to eligible works in that year/channel |
 
-A character is counted once within a given year/channel even if multiple linked works appear in the results.
+## Supplementary source output
 
-## Inclusion rule
+### data/raw/supplementary/lezwatch_characters.jsonl
+One raw-source-preserving JSON object per deduplicated LezWatch character:
+- `source`, `source_url`, `source_id`, `source_slug`: provenance and stable source key;
+- `name`: source display name;
+- `identity_taxonomy_query`, `identity_labels`, `gender_labels`: original taxonomy values, kept separate;
+- `shows`: associated TV shows as returned by the source;
+- `source_record_url`, `retrieved_at`, `raw_record_json`: audit trail;
+- `verification_status`: starts at `candidate`, never auto-promoted to verified.
 
-The current query requires the character's P91 statement to point to Q6636 (homosexuality), and its P31 class to be fictional character Q95074 or a subclass. This narrow explicit-claim rule deliberately avoids classifying characters from plot text, fan interpretation, performer identity, or relationship inference.
+This output is not yet merged into the European-origin annual analysis. Entity matching, work-origin validation, and evidence review must happen before inclusion.
 
-## Caveats requiring attention
+## Planned canonical entity schema
 
-- P91 is not a complete or uniformly applied classification of fictional characters.
-- Multiple sources and works can have inconsistent or changing claims.
-- P577 can represent publication, release, broadcast, or another publication event. This pipeline uses the earliest four digits of each returned date and does not yet resolve competing date qualifiers.
-- P495 may list multiple production countries. Any European P495 country qualifies the work.
-- The type hierarchy may have gaps; the three media channel definitions are operational approximations, not a complete theory of media.
-- TV series are assigned a year based on a series-level publication date. A single character appearing in multiple seasons is not counted once per season.
-- The project currently measures explicitly documented homosexuality only. It is not a general LGBTQ+ census.
+The consolidated dataset will use one canonical row per character entity and separate linked tables for identities, works, appearances, sources/evidence, aliases, and entity-resolution decisions. This avoids flattening multiple identities, works, or conflicting statements into one lossy record.
+
+Required provenance for every identity claim: source, source record/URL, exact source label or statement, retrieval date, evidence tier, review status, and notes. Keep sexuality, romantic orientation, and gender identity as separate dimensions.
+
+## Inclusion rule (legacy baseline)
+
+The original WDQS baseline requires P91=Q6636 (homosexuality) and fictional-character class Q95074 or subclass, with a P1441 or P674 work link. This remains a reproducible narrow baseline; it is not the expanded corpus definition.
