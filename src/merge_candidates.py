@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 FILES = (
-    "wikidata_lgbtq_candidates.jsonl",
+    "wikidata_character_candidates.jsonl",
     "fandom_universe_candidates.jsonl",
 )
 
