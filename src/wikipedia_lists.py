@@ -35,11 +35,11 @@ PAGES = [
     "List_of_webcomics_with_LGBT_characters",
 ]
 HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.5 (research)"}
-YEAR_RE = re.compile(r"(?<!\\d)(18\\d{2}|19\\d{2}|20\\d{2})(?!\\d)")
+YEAR_RE = re.compile(r"(?<!\d)(18\d{2}|19\d{2}|20\d{2})(?!\d)")
 
 
 def _norm(value: str) -> str:
-    return re.sub(r"\\s+", " ", value or "").strip().casefold()
+    return re.sub(r"\s+", " ", value or "").strip().casefold()
 
 
 def _medium(page: str) -> str:
@@ -144,8 +144,11 @@ def scrape(output_dir: str | Path) -> list[dict]:
                     work = cell_text(work_idx)
                     if not work and len(cells) > 1:
                         work = " | ".join(c.get_text(" ", strip=True) for i, c in enumerate(cells) if i != char_idx)
-                    year_text = cell_text(year_idx)
-                    years = YEAR_RE.findall(year_text or " ".join(c.get_text(" ", strip=True) for c in cells))
+                    # Search every cell: list layouts often put the first
+                    # appearance year beside the work title rather than in a
+                    # dedicated "year" column.
+                    year_text = " ".join(c.get_text(" ", strip=True) for c in cells)
+                    years = YEAR_RE.findall(year_text)
                     country = cell_text(country_idx)
                     notes = cell_text(notes_idx)
                     reason = f"Listed as {identity} in the curated Wikipedia character list."
