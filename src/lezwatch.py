@@ -138,7 +138,7 @@ def fetch_sexuality_export(output_dir: str | Path) -> list[dict]:
             shows = item.get("shows") or []
             work_names = [s.get("name", "") for s in shows if isinstance(s, dict) and s.get("name")]
             gender_terms = re.findall(
-                r"\\b(trans(?:gender)?(?: man| woman)?|non[- ]binary|agender|genderfluid|genderqueer|two[- ]spirit|intersex)\\b",
+                r"\b(trans(?:gender)?(?: man| woman)?|non[- ]binary|agender|genderfluid|genderqueer|two[- ]spirit|intersex)\b",
                 description, flags=re.I
             )
             if orientation:
