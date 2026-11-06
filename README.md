@@ -63,6 +63,6 @@ Run supplementary ingestion locally:
 python -m src.ingest_sources --source all
 ```
 
-Outputs are written to `data/raw/supplementary/`. They are source-preserving candidate data and are **not automatically merged into the Europe-only annual graph**. Entity matching, work-origin validation, source citation checks, and review must happen first.
+Source-preserving outputs are written to `data/raw/supplementary/`; the merged candidate dictionary and count summary are persisted at `data/processed/character_dictionary.jsonl` and `data/processed/collection_summary.json`. The dictionary is a broad discovery corpus and is **not automatically treated as Europe-eligible or independently verified**; those filters are reported separately. Entity matching, work-origin validation, source citation checks, and review must happen first.
 
 See [SOURCES_AND_METHOD.md](docs/SOURCES_AND_METHOD.md) for source coverage, licensing constraints, and the evidence model. In particular, IMDb's non-commercial bulk data is not ingested into or redistributed by this public repository. The project will report candidate counts separately from verified, analysis-eligible unique characters. The 15,000-character target is a minimum research objective, not a claim that the current sources already meet it.
