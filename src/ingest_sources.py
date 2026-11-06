@@ -7,11 +7,12 @@ from pathlib import Path
 
 from .lezwatch import fetch_sexuality_export
 from .wikipedia_lists import scrape as scrape_wikipedia
+from .wikidata_lgbtq import scrape as scrape_wikidata_lgbtq
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", choices=["lezwatch", "wikipedia", "all"], default="all")
+    parser.add_argument("--source", choices=["lezwatch", "wikipedia", "wikidata", "all"], default="all")
     parser.add_argument("--output-dir", default="data/raw/supplementary")
     args = parser.parse_args()
     output = Path(args.output_dir)
@@ -24,6 +25,13 @@ def main() -> None:
             "unique_source_characters": len(records),
             "file": str(output / "lezwatch_characters.jsonl"),
             "note": "TV-focused candidate source; Europe/work eligibility and identity evidence require reconciliation.",
+        }
+    if args.source in {"wikidata", "all"}:
+        records = scrape_wikidata_lgbtq(output)
+        results["Wikidata LGBTQ"] = {
+            "candidate_rows": len(records),
+            "file": str(output / "wikidata_lgbtq_candidates.jsonl"),
+            "note": "European-origin work candidates; P91 sexual orientation and P21 gender identity kept separate; requires source-reference review.",
         }
     if args.source in {"wikipedia", "all"}:
         records = scrape_wikipedia(output)
