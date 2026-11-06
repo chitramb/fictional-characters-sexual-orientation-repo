@@ -102,11 +102,19 @@ def _category_pages(session, api, category):
 def _extract_pages(session, api, titles):
     for offset in range(0, len(titles), 20):
         batch = titles[offset:offset+20]
-        params = {"action":"query","prop":"extracts","explaintext":1,"exchars":6000,
-                  "titles":"|".join(batch),"format":"json"}
+        params = {
+            "action": "query", "prop": "revisions", "rvprop": "content",
+            "rvslots": "main", "titles": "|".join(batch), "format": "json",
+        }
         payload = _get(session, api, params)
         pages = payload.get("query", {}).get("pages", {})
         for page in pages.values():
+            revisions = page.get("revisions", [])
+            if not revisions:
+                continue
+            revision = revisions[0]
+            main = revision.get("slots", {}).get("main", {})
+            page["wikitext"] = main.get("*") or main.get("content") or revision.get("*") or ""
             yield page
         time.sleep(0.15)
 
