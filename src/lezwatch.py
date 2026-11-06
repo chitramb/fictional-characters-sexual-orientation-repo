@@ -76,7 +76,7 @@ def _orientation(labels: Any, description: str = "") -> str:
     for pattern, label in PATTERNS:
         if pattern.search(text) and label not in found:
             found.append(label)
-    return "; ".join(found) if found else text.strip()
+    return "; ".join(found) if found else ""
 
 
 def fetch_sexuality_export(output_dir: str | Path) -> list[dict]:
@@ -123,30 +123,48 @@ def fetch_sexuality_export(output_dir: str | Path) -> list[dict]:
         print(f"LezWatch {term}: {count:,} rows; {len(merged):,} unique characters so far", flush=True)
         time.sleep(6)
 
-    # Fallback/coverage check: the documented complete character list can expose
-    # additional records if a taxonomy export slug changes or a term is omitted.
-    if not merged:
-        url = f"{BASE}/export/list/characters/"
-        try:
-            payload = get_json(url, session)
-            for source_key, item in _items(payload):
-                if not isinstance(item, dict):
-                    continue
-                description = str(item.get("description") or "")
-                orientation = _orientation("", description)
-                if not orientation:
-                    continue
-                source_id = str(item.get("id") or source_key)
-                merged[source_id] = {
-                    "character": item.get("name", ""),
-                    "work": "",
-                    "medium": "TV",
-                    "orientation": orientation,
-                    "reason": f"LezWatch character profile describes the character as {orientation}.",
-                    "source": f"https://lezwatchtv.com/character/{item.get('id') or source_key}/",
-                }
-        except (requests.RequestException, ValueError) as exc:
-            print(f"LezWatch complete-list fallback unavailable: {exc}", flush=True)
+    # Always ingest the complete curated character export as a discovery source.
+    # The site covers queer female, trans and non-binary TV characters; a row's
+    # presence is a candidate signal, not proof of a specific sexual orientation.
+    url = f"{BASE}/export/list/characters/"
+    try:
+        payload = get_json(url, session)
+        for source_key, item in _items(payload):
+            if not isinstance(item, dict):
+                continue
+            source_id = str(item.get("id") or source_key)
+            description = str(item.get("description") or "")
+            orientation = _orientation(item.get("sexuality") or "", description)
+            shows = item.get("shows") or []
+            work_names = [s.get("name", "") for s in shows if isinstance(s, dict) and s.get("name")]
+            gender_terms = re.findall(
+                r"\\b(trans(?:gender)?(?: man| woman)?|non[- ]binary|agender|genderfluid|genderqueer|two[- ]spirit|intersex)\\b",
+                description, flags=re.I
+            )
+            if orientation:
+                reason = f"LezWatch profile explicitly describes sexual orientation: {orientation}."
+            elif gender_terms:
+                reason = "LezWatch profile describes gender identity as " + ", ".join(dict.fromkeys(gender_terms)) + "; sexual orientation is not stated."
+                orientation = "Not stated"
+            else:
+                reason = "Included in LezWatch's specialist queer-character database; precise identity requires profile-level review."
+                orientation = "Not stated"
+            source_url = item.get("url") or f"https://lezwatchtv.com/character/{source_id}/"
+            record = merged.setdefault(source_id, {
+                "character": item.get("name", ""),
+                "work": "; ".join(dict.fromkeys(work_names)),
+                "medium": "TV",
+                "orientation": orientation,
+                "reason": reason,
+                "source": source_url,
+            })
+            if work_names and not record.get("work"):
+                record["work"] = "; ".join(dict.fromkeys(work_names))
+            if record.get("orientation") == "Not stated" and orientation != "Not stated":
+                record["orientation"] = orientation
+                record["reason"] = reason
+    except (requests.RequestException, ValueError) as exc:
+        print(f"LezWatch complete-list export unavailable: {exc}", flush=True)
 
     records = [r for r in merged.values() if r.get("character")]
     with (out / "lezwatch_characters.jsonl").open("w", encoding="utf-8") as f:
