@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: supplementary-character-ingestion
+  group: neutral-universe-first-ingestion
   cancel-in-progress: false
 
 jobs:
