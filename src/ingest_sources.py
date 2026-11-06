@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .wikidata_lgbtq import scrape as scrape_wikidata_lgbtq
+from .wikidata_characters import scrape_wikidata_characters
 from .fandom_universes import scrape_fandom_universes
 from .merge_candidates import merge as merge_candidates
 
@@ -17,10 +17,10 @@ def main() -> None:
     output.mkdir(parents=True, exist_ok=True)
     results = {}
     if args.source in {"wikidata", "all"}:
-        records = scrape_wikidata_lgbtq(output)
-        results["Wikidata"] = {
+        records = scrape_wikidata_characters(output)
+        results["Wikidata character records"] = {
             "candidate_rows": len(records),
-            "file": str(output / "wikidata_lgbtq_candidates.jsonl"),
+            "file": str(output / "wikidata_character_candidates.jsonl"),
             "note": "Broad European-origin fiction discovery; sexual orientation P91 and gender identity P21 remain separate.",
         }
     if args.source in {"fandom", "all"}:
