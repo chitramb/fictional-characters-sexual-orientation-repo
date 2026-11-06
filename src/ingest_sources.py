@@ -9,11 +9,12 @@ from .lezwatch import fetch_sexuality_export
 from .wikipedia_lists import scrape as scrape_wikipedia
 from .wikidata_lgbtq import scrape as scrape_wikidata_lgbtq
 from .merge_candidates import merge as merge_candidates
+from .community_archives import scrape_community_wikis
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", choices=["lezwatch", "wikipedia", "wikidata", "all"], default="all")
+    parser.add_argument("--source", choices=["lezwatch", "wikipedia", "wikidata", "community", "all"], default="all")
     parser.add_argument("--output-dir", default="data/raw/supplementary")
     args = parser.parse_args()
     output = Path(args.output_dir)
@@ -33,6 +34,13 @@ def main() -> None:
             "candidate_rows": len(records),
             "file": str(output / "wikidata_lgbtq_candidates.jsonl"),
             "note": "European-origin work candidates; P91 sexual orientation and P21 gender identity kept separate; requires source-reference review.",
+        }
+    if args.source in {"community", "all"}:
+        records = scrape_community_wikis(output)
+        results["Community character wikis"] = {
+            "candidate_rows": len(records),
+            "file": str(output / "community_wiki_candidates.jsonl"),
+            "note": "Category-derived candidates; work, European origin and exact identity require review.",
         }
     if args.source in {"wikipedia", "all"}:
         records = scrape_wikipedia(output)
