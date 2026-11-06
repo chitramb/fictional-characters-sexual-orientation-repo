@@ -95,7 +95,7 @@ def scrape(output_dir: str | Path, start_year: int = 1900, end_year: int = 2027)
         stop = min(start + 20, end_year)
         query = build_query(start, stop)
         try:
-            rows = query_wikidata(query, timeout=240, attempts=5)
+            rows = query_wikidata(query, timeout=120, attempts=3)
             for row in rows:
                 record = _record(row)
                 if not record or not record["character"]:
