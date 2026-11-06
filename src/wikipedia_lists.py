@@ -1,17 +1,10 @@
-"""Candidate discovery from curated Wikipedia LGBTQ+ fiction list pages.
-
-Rows are discovery leads only. The scraper does not infer an identity from a
-name or page title and does not promote records to verified status.
-"""
+"""Lean candidate discovery from curated Wikipedia LGBTQ+ fiction lists."""
 from __future__ import annotations
-
 import json
 import re
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -28,74 +21,58 @@ PAGES = [
     "List_of_made-for-television_films_with_LGBTQ_characters",
     "Lists_of_LGBTQ_figures_in_fiction_and_myth",
 ]
-HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.3 (research)"}
-
-
-def fetch_page(session: requests.Session, title: str) -> str:
-    response = session.get(API, params={
-        "action": "parse", "page": title, "prop": "text", "format": "json",
-        "formatversion": 2,
-    }, headers=HEADERS, timeout=(15, 90))
-    response.raise_for_status()
-    payload = response.json()
-    if "error" in payload:
-        raise ValueError(payload["error"])
-    return payload["parse"]["text"]
+HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.4 (research)"}
 
 
 def scrape(output_dir: str | Path) -> list[dict]:
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
-    retrieved = datetime.now(timezone.utc).isoformat()
-    candidates = []
-    for title in PAGES:
+    records, seen = [], set()
+    for page in PAGES:
         try:
-            html = fetch_page(session, title)
+            response = session.get(API, params={
+                "action": "parse", "page": page, "prop": "text",
+                "format": "json", "formatversion": 2,
+            }, headers=HEADERS, timeout=(15, 90))
+            response.raise_for_status()
+            payload = response.json()
+            html = payload["parse"]["text"]
         except Exception as exc:
-            print(f"Wikipedia list unavailable ({title}): {exc}", flush=True)
+            print(f"Wikipedia list unavailable ({page}): {exc}", flush=True)
             continue
         soup = BeautifulSoup(html, "html.parser")
-        for table_index, table in enumerate(soup.select("table.wikitable")):
-            for row_index, tr in enumerate(table.select("tr")):
+        list_url = "https://en.wikipedia.org/wiki/" + quote(page)
+        for table in soup.select("table.wikitable"):
+            for tr in table.select("tr"):
                 cells = tr.find_all(["th", "td"], recursive=False)
                 if not cells or all(c.name == "th" for c in cells):
                     continue
-                first = cells[0]
-                link = first.find("a", href=re.compile(r"^/wiki/"))
+                link = cells[0].find("a", href=re.compile(r"^/wiki/"))
                 if not link:
                     continue
                 name = link.get_text(" ", strip=True)
                 href = link.get("href", "")
                 if not name or ":" in href:
                     continue
-                candidates.append({
-                    "source": "Wikipedia curated list",
-                    "source_page": title.replace("_", " "),
-                    "source_url": "https://en.wikipedia.org/wiki/" + quote(title),
-                    "source_row": row_index,
-                    "table_index": table_index,
-                    "candidate_name": name,
-                    "candidate_article_url": "https://en.wikipedia.org" + href,
-                    "row_text": " | ".join(c.get_text(" ", strip=True) for c in cells),
-                    "retrieved_at": retrieved,
-                    "verification_status": "candidate",
+                row_text = " | ".join(c.get_text(" ", strip=True) for c in cells)
+                key = (name.casefold(), page)
+                if key in seen:
+                    continue
+                seen.add(key)
+                orientation = page.replace("_", " ").replace("List of fictional ", "").replace("List of ", "")
+                records.append({
+                    "character": name,
+                    "work": row_text,
+                    "medium": "Unclassified",
+                    "orientation": orientation,
+                    "reason": f"Included in Wikipedia's curated list: {page.replace('_', ' ')}.",
+                    "source": list_url,
+                    "character_reference": "https://en.wikipedia.org" + href,
                 })
-        time.sleep(1.2)  # be polite to Wikimedia API
-        print(f"Wikipedia {title}: {len(candidates):,} cumulative table candidates", flush=True)
-
-    # Exact duplicate page/character rows are removed; different list-page
-    # memberships remain as separate provenance records.
-    seen = set()
-    unique = []
-    for row in candidates:
-        key = (row["source_page"], row["candidate_article_url"], row["row_text"])
-        if key not in seen:
-            seen.add(key)
-            unique.append(row)
-    path = out / "wikipedia_list_candidates.jsonl"
-    with path.open("w", encoding="utf-8") as handle:
-        for row in unique:
-            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-    print(f"Wikipedia list candidate rows: {len(unique):,}", flush=True)
-    return unique
+        print(f"Wikipedia {page}: {len(records):,} candidate rows total", flush=True)
+        time.sleep(1.2)
+    with (out / "wikipedia_list_candidates.jsonl").open("w", encoding="utf-8") as f:
+        for record in records:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return records
