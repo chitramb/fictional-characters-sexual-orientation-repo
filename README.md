@@ -51,9 +51,11 @@ Results should be reported as “Wikidata-recorded characters” rather than tot
 
 ## Multi-source expansion (in progress)
 
-The original Wikidata extraction is retained as a strict, reproducible baseline. A separate supplementary ingestion path now collects:
-- LezWatch.TV sexuality-specific character exports (TV-focused structured source);
-- curated Wikipedia LGBTQ+ fiction list rows (candidate discovery only; rows require evidence review).
+The original Wikidata extraction is retained as a strict, reproducible baseline. A separate supplementary ingestion path now uses a neutral, universe-first discovery strategy:
+- broad Wikidata character/work links with sexual orientation and gender identity kept separate;
+- general Fandom wikis for major fictional universes, discovering character pages from ordinary character categories and reading orientation only from explicit character-page infobox fields.
+
+Queer-specialist databases and LGBTQ-only character directories are excluded from the main candidate pool to avoid source-selection bias. Missing orientation remains “Not stated”; it is never inferred from plot, actors, relationships or the universe's reputation.
 
 Run supplementary ingestion locally:
 
