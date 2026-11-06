@@ -1,60 +1,39 @@
-"""Run supplementary source ingestion independently of WDQS."""
+"""Run neutral, universe-first character discovery sources."""
 from __future__ import annotations
-
 import argparse
 import json
 from pathlib import Path
 
-from .lezwatch import fetch_sexuality_export
-from .wikipedia_lists import scrape as scrape_wikipedia
 from .wikidata_lgbtq import scrape as scrape_wikidata_lgbtq
+from .fandom_universes import scrape_fandom_universes
 from .merge_candidates import merge as merge_candidates
-from .community_archives import scrape_community_wikis
-
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", choices=["lezwatch", "wikipedia", "wikidata", "community", "all"], default="all")
+    parser.add_argument("--source", choices=["wikidata", "fandom", "all"], default="all")
     parser.add_argument("--output-dir", default="data/raw/supplementary")
     args = parser.parse_args()
     output = Path(args.output_dir)
     output.mkdir(parents=True, exist_ok=True)
-
     results = {}
-    if args.source in {"lezwatch", "all"}:
-        records = fetch_sexuality_export(output)
-        results["LezWatch.TV"] = {
-            "unique_source_characters": len(records),
-            "file": str(output / "lezwatch_characters.jsonl"),
-            "note": "TV-focused candidate source; Europe/work eligibility and identity evidence require reconciliation.",
-        }
     if args.source in {"wikidata", "all"}:
         records = scrape_wikidata_lgbtq(output)
-        results["Wikidata LGBTQ"] = {
+        results["Wikidata"] = {
             "candidate_rows": len(records),
             "file": str(output / "wikidata_lgbtq_candidates.jsonl"),
-            "note": "European-origin work candidates; P91 sexual orientation and P21 gender identity kept separate; requires source-reference review.",
+            "note": "Broad European-origin fiction discovery; sexual orientation P91 and gender identity P21 remain separate.",
         }
-    if args.source in {"community", "all"}:
-        records = scrape_community_wikis(output)
-        results["Community character wikis"] = {
+    if args.source in {"fandom", "all"}:
+        records = scrape_fandom_universes(output)
+        results["General Fandom universes"] = {
             "candidate_rows": len(records),
-            "file": str(output / "community_wiki_candidates.jsonl"),
-            "note": "Category-derived candidates; work, European origin and exact identity require review.",
-        }
-    if args.source in {"wikipedia", "all"}:
-        records = scrape_wikipedia(output)
-        results["Wikipedia lists"] = {
-            "candidate_rows": len(records),
-            "file": str(output / "wikipedia_list_candidates.jsonl"),
-            "note": "Curated list rows are discovery leads, not automatically verified identity claims.",
+            "distinct_character_names": len({r["character"].casefold() for r in records}),
+            "file": str(output / "fandom_universe_candidates.jsonl"),
+            "note": "Universe-first discovery from general character categories; orientation only recorded from explicit page fields.",
         }
     results["Cross-source merge"] = merge_candidates(output)
-    (output / "ingestion_summary.json").write_text(
-        json.dumps(results, indent=2), encoding="utf-8"
-    )
+    (output / "ingestion_summary.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(json.dumps(results, indent=2))
-
 
 if __name__ == "__main__":
     main()
