@@ -80,6 +80,7 @@ def scrape_wikidata_characters(output_dir: str | Path, start_year: int = 1900, e
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     records: dict[tuple[str, str, str, int], dict] = {}
+    checkpoint = out / "wikidata_character_candidates.jsonl"
     for start in range(start_year, end_year, 20):
         stop = min(start + 20, end_year)
         query = build_query(start, stop)
@@ -92,12 +93,11 @@ def scrape_wikidata_characters(output_dir: str | Path, start_year: int = 1900, e
                 key = (record["character"].casefold(), record["work"].casefold(),
                        record["medium"], record["year"])
                 records.setdefault(key, record)
-            print(f"Wikidata LGBTQ {start}-{stop-1}: {len(rows):,} rows; {len(records):,} unique character-work candidates", flush=True)
+            print(f"Wikidata {start}-{stop-1}: {len(rows):,} rows; {len(records):,} unique character-work candidates", flush=True)
         except Exception as exc:
-            print(f"Wikidata LGBTQ partition {start}-{stop-1} failed: {exc}", flush=True)
+            print(f"Wikidata partition {start}-{stop-1} failed: {exc}", flush=True)
+        with checkpoint.open("w", encoding="utf-8") as handle:
+            for record in records.values():
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
         time.sleep(3)
-    result = list(records.values())
-    with (out / "wikidata_character_candidates.jsonl").open("w", encoding="utf-8") as f:
-        for record in result:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
-    return result
+    return list(records.values())
