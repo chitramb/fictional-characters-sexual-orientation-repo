@@ -63,12 +63,22 @@ def merge(output_dir: str | Path) -> dict:
     with output.open("w", encoding="utf-8") as handle:
         for row in merged.values():
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+    orientations = {}
+    media = {}
+    for row in merged.values():
+        label = row.get("orientation") or "Not stated"
+        orientations[label] = orientations.get(label, 0) + 1
+        medium = row.get("medium") or "Unclassified"
+        media[medium] = media.get(medium, 0) + 1
     summary = {
         "source_rows": source_rows,
         "merged_candidate_records": len(merged),
         "distinct_character_names": len({norm(row["character"]) for row in merged.values()}),
+        "records_with_explicit_orientation": sum(1 for row in merged.values() if row.get("orientation") not in ("", "Not stated")),
+        "orientation_counts": orientations,
+        "medium_counts": media,
         "output": str(output),
-        "note": "Conservative name/work merge of source candidates; not all records are independently verified or Europe-eligible.",
+        "note": "General-universe candidate dictionary; records still require entity resolution, source review, and Europe eligibility checks.",
     }
     (root / "merge_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
