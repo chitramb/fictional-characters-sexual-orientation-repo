@@ -99,7 +99,9 @@ LABEL_RE = re.compile(
 def _get(session, api, params, attempts=4):
     for attempt in range(attempts):
         try:
-            response = session.get(api, params=params, timeout=(15, 75))
+            response = session.get(api, params=params, timeout=(12, 35))
+            if response.status_code in (401, 403, 404):
+                return {}
             if response.status_code in (429, 500, 502, 503, 504):
                 time.sleep(min(60, 6 * (2 ** attempt)))
                 continue
