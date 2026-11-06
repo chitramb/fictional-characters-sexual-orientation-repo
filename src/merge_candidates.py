@@ -90,3 +90,11 @@ def merge(output_dir: str | Path) -> dict:
     summary["persistent_dictionary"] = str(dictionary_path)
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", default="data/raw/supplementary")
+    args = parser.parse_args()
+    print(json.dumps(merge(args.output_dir), indent=2))
