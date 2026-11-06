@@ -159,7 +159,7 @@ def _orientation(extract):
             continue
         value = match.group(1).strip(" .;,*")
         labels = [x.casefold() for x in LABEL_RE.findall(value)]
-        if labels and not re.search(r"\\b(?:not|never|non)\\s+(?:gay|lesbian|bisexual|pansexual|asexual|queer|homosexual)\\b", value, re.I):
+        if labels and not re.search(r"\b(?:not|never|non)\s+(?:gay|lesbian|bisexual|pansexual|asexual|queer|homosexual)\b", value, re.I):
             label = "; ".join(dict.fromkeys(labels))
             return label, f"Character page explicitly gives sexuality/orientation as {label}."
     return "Not stated", "Character discovered from a general-universe character category; page has no explicit orientation field."
