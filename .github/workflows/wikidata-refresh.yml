@@ -1,0 +1,51 @@
+name: Refresh Wikidata character analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_year:
+        description: "First year (inclusive)"
+        required: true
+        default: "1900"
+      end_year:
+        description: "Last year (inclusive)"
+        required: true
+        default: "2026"
+  schedule:
+    - cron: "17 3 1 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wikidata-character-analysis
+  cancel-in-progress: false
+
+jobs:
+  extract-and-plot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run resumable WDQS pipeline
+        env:
+          START_YEAR: ${{ github.event.inputs.start_year || '1900' }}
+          END_YEAR: ${{ github.event.inputs.end_year || '2026' }}
+        run: |
+          python -m src.run_pipeline --start-year "$START_YEAR" --end-year "$END_YEAR" --bucket-years 1 --pause 2
+      - name: Upload datasets and plots
+        uses: actions/upload-artifact@v4
+        with:
+          name: european-homosexual-fictional-characters-${{ github.run_number }}
+          path: |
+            data/processed/*.csv
+            reports/*.png
+            reports/*.json
+          if-no-files-found: error
+          retention-days: 90
