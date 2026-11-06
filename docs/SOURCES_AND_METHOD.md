@@ -7,7 +7,7 @@ Build a broad, universe-first dictionary of at least 15,000 fictional-character 
 ## Source tiers
 
 ### Tier 1 — broad structured character/identity records
-- **Wikidata**: open structured entity graph. The broad extractor queries English labels attached to the sexual-orientation property (P91) and, in a separate branch, gender-identity property (P21), then joins characters to dated European-origin film, TV, book, comic and video-game works. Sexual orientation and gender identity remain separate; source statements and work links still need review.
+- **Wikidata**: open structured entity graph. The broad extractor queries English labels attached to the sexual-orientation property (P91), including heterosexual orientations, and in a separate branch gender-identity property (P21), then joins characters to dated European-origin film, TV, book, comic and video-game works. Sexual orientation and gender identity remain separate; source statements and work links still need review.
 - **General-universe Fandom wikis**: character categories and character-page infoboxes from broad fictional universes (for example Harry Potter, Marvel, DC, Star Wars, Doctor Who, Middle-earth, Star Trek, Pokémon, Zelda and others). Universe inclusion is independent of LGBTQ status. Character orientation is recorded only from an explicit sexuality/orientation field; absent fields remain “Not stated”.
 
 ### Tier 2 — work metadata and cross-checks
@@ -44,15 +44,12 @@ A larger sample does not automatically become representative. The source ecosyst
 
 ## Initial source references
 
-- Lezwatch API docs: https://docs.lezwatchtv.com/api/
-- LezWatch export endpoint docs: https://docs.lezwatchtv.com/api/global/export/
 - Fictional Characters Wiki LGBTQ category: https://characters.fandom.com/wiki/Category:LGBT_Characters
 - LGBTQIA+ Characters Wikia: https://lgbtqia-characters.fandom.com/
 - Queer Comics Database: https://queercomicsdatabase.com/
 - AroAce Database discovery portal: https://www.tulsalibrary.org/lgbt-recs
 - Queer SFF book database: https://queersff.theillustratedpage.net/
 - Queerlit project overview: https://ecp.ep.liu.se/index.php/hic/article/download/889/797/909
-- LezWatch character statistics docs: https://docs.lezwatchtv.com/api/statistics/characters/
 - Wikidata WikiProject LGBT models: https://www.wikidata.org/wiki/Wikidata:WikiProject_LGBT/Models
 - IMDb non-commercial data terms/docs: https://data.imdb.com/documentation
 - TMDB daily ID exports: https://developer.themoviedb.org/docs/daily-id-exports
