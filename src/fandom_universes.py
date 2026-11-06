@@ -35,6 +35,20 @@ UNIVERSES = [
     ("League of Legends", "https://leagueoflegends.fandom.com/api.php", "Video game", "League of Legends"),
     ("Overwatch", "https://overwatch.fandom.com/api.php", "Video game", "Overwatch"),
     ("Danganronpa", "https://danganronpa.fandom.com/api.php", "Video game", "Danganronpa"),
+    ("The Witcher", "https://witcher.fandom.com/api.php", "Book/game/TV", "The Witcher"),
+    ("Discworld", "https://discworld.fandom.com/api.php", "Book", "Discworld"),
+    ("Asterix", "https://asterix.fandom.com/api.php", "Comics/film", "Asterix"),
+    ("Tintin", "https://tintin.fandom.com/api.php", "Comics/film/TV", "The Adventures of Tintin"),
+    ("The Simpsons", "https://simpsons.fandom.com/api.php", "Animation", "The Simpsons"),
+    ("Futurama", "https://futurama.fandom.com/api.php", "Animation", "Futurama"),
+    ("Disney", "https://disney.fandom.com/api.php", "Animation/film", "Disney"),
+    ("Pixar", "https://pixar.fandom.com/api.php", "Animation/film", "Pixar"),
+    ("Adventure Time", "https://adventuretime.fandom.com/api.php", "Animation", "Adventure Time"),
+    ("Steven Universe", "https://steven-universe.fandom.com/api.php", "Animation", "Steven Universe"),
+    ("My Little Pony", "https://mlp.fandom.com/api.php", "Animation", "My Little Pony"),
+    ("RWBY", "https://rwby.fandom.com/api.php", "Animation", "RWBY"),
+    ("Hazbin Hotel", "https://hazbinhotel.fandom.com/api.php", "Animation", "Hazbin Hotel"),
+    ("Gundam", "https://gundam.fandom.com/api.php", "Animation", "Mobile Suit Gundam"),
 ]
 HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.7 (universe-first open research)"}
 ORIENTATION_VALUES = (
@@ -73,9 +87,11 @@ def _character_categories(session, api):
         for item in payload.get("query", {}).get("allcategories", []):
             title = item.get("*", "")
             low = title.casefold()
-            if "character" in low and not any(x in low for x in
-                ("lgbt", "gay character", "lesbian character", "bisexual character",
-                 "queer character", "transgender character", "asexual character")):
+            identity_category = re.search(
+                r"\\b(lgbtq?|gay|lesbian|bisexual|pansexual|asexual|aromantic|queer|transgender|non.?binary|intersex)\\b",
+                low,
+            )
+            if "character" in low and not identity_category:
                 found.append(title)
         cont = payload.get("continue")
         if not cont:
