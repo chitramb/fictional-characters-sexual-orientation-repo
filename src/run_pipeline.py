@@ -38,18 +38,18 @@ def run_extract(args) -> pd.DataFrame:
             hi = min(lo + args.bucket_years, args.end_year + 1)
             cache = partition_path(channel, lo, hi)
             if cache.exists() and not args.refresh:
-                print(f"Using cached partition: {cache.name}")
+                print(f"Using cached partition: {cache.name}", flush=True)
                 part = pd.read_json(cache, lines=True)
                 all_records.extend(part.to_dict("records"))
                 continue
-            print(f"Fetching {channel}: {lo}–{hi - 1}")
+            print(f"Fetching {channel}: {lo}–{hi - 1}", flush=True)
             records = fetch_partition(lo, hi, channel)
             # Atomic write: an interrupted process cannot leave a partial cache.
             tmp = cache.with_suffix(".jsonl.tmp")
             pd.DataFrame(records).to_json(tmp, orient="records", lines=True, force_ascii=False)
             tmp.replace(cache)
             all_records.extend(records)
-            print(f"  received {len(records):,} character-work rows")
+            print(f"  received {len(records):,} character-work rows", flush=True)
             time.sleep(args.pause)
     return pd.DataFrame(all_records)
 
