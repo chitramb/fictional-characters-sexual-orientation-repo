@@ -81,4 +81,12 @@ def merge(output_dir: str | Path) -> dict:
         "note": "General-universe candidate dictionary; records still require entity resolution, source review, and Europe eligibility checks.",
     }
     (root / "merge_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    project_root = Path(__file__).resolve().parents[1]
+    processed = project_root / "data" / "processed"
+    processed.mkdir(parents=True, exist_ok=True)
+    dictionary_path = processed / "character_dictionary.jsonl"
+    summary_path = processed / "collection_summary.json"
+    dictionary_path.write_text(output.read_text(encoding="utf-8"), encoding="utf-8")
+    summary["persistent_dictionary"] = str(dictionary_path)
+    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
