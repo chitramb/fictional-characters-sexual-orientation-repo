@@ -11,7 +11,7 @@ FILES = (
 )
 
 def norm(value: str) -> str:
-    return re.sub(r"\\s+", " ", (value or "").strip()).casefold()
+    return re.sub(r"\s+", " ", (value or "").strip()).casefold()
 
 def merge(output_dir: str | Path) -> dict:
     root = Path(output_dir)
