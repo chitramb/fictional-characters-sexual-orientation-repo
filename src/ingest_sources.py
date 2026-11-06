@@ -8,6 +8,7 @@ from pathlib import Path
 from .lezwatch import fetch_sexuality_export
 from .wikipedia_lists import scrape as scrape_wikipedia
 from .wikidata_lgbtq import scrape as scrape_wikidata_lgbtq
+from .merge_candidates import merge as merge_candidates
 
 
 def main() -> None:
@@ -40,6 +41,7 @@ def main() -> None:
             "file": str(output / "wikipedia_list_candidates.jsonl"),
             "note": "Curated list rows are discovery leads, not automatically verified identity claims.",
         }
+    results["Cross-source merge"] = merge_candidates(output)
     (output / "ingestion_summary.json").write_text(
         json.dumps(results, indent=2), encoding="utf-8"
     )
