@@ -33,6 +33,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
           git add -f data/processed/character_dictionary.jsonl data/processed/collection_summary.json
           if ! git diff --cached --quiet; then
             git commit -m "Refresh universe-first fictional character dictionary"
