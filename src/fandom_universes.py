@@ -119,7 +119,7 @@ def _character_categories(session, api):
     while True:
         payload = _get(session, api, params)
         for item in payload.get("query", {}).get("allcategories", []):
-            title = item.get("*", "")
+            title = item.get("category") or item.get("*") or item.get("title", "")
             low = title.casefold()
             identity_category = re.search(
                 r"\b(lgbtq?|gay|lesbian|bisexual|pansexual|asexual|aromantic|queer|transgender|non.?binary|intersex)\b",
