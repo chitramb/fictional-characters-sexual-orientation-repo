@@ -43,11 +43,11 @@ ORIENTATION_VALUES = (
     "aromantic", "polysexual", "omnisexual", "abrosexual",
 )
 FIELD_RE = re.compile(
-    r"(?:sexuality|sexual orientation)\\s*[:=]\\s*([^|}\\n<]{2,80})",
+    r"(?:sexuality|sexual orientation)\s*[:=]\s*([^|}\n<]{2,80})",
     re.I,
 )
 LABEL_RE = re.compile(
-    r"\\b(" + "|".join(map(re.escape, ORIENTATION_VALUES)) + r")\\b", re.I
+    r"\b(" + "|".join(map(re.escape, ORIENTATION_VALUES)) + r")\b", re.I
 )
 
 def _get(session, api, params, attempts=4):
