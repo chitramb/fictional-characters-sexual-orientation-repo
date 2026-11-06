@@ -52,7 +52,7 @@ UNIVERSES = [
 ]
 HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.7 (universe-first open research)"}
 ORIENTATION_VALUES = (
-    "homosexual", "heterosexual", "bisexual", "pansexual", "asexual",
+    "homosexual", "heterosexual", "straight", "bisexual", "pansexual", "asexual",
     "demisexual", "graysexual", "greysexual", "queer", "lesbian", "gay",
     "aromantic", "polysexual", "omnisexual", "abrosexual",
 )
@@ -101,19 +101,35 @@ def _character_categories(session, api):
     return sorted(set(found), key=lambda x: (0 if x.casefold() in
                    ("characters", "fictional characters", "main characters") else 1, x.casefold()))[:35]
 
-def _category_pages(session, api, category):
-    params = {"action":"query","list":"categorymembers","cmtitle":"Category:"+category,
-              "cmtype":"page","cmlimit":"max","format":"json"}
-    while True:
-        payload = _get(session, api, params)
-        for item in payload.get("query", {}).get("categorymembers", []):
-            title = item.get("title", "")
-            if title and not title.startswith(("Category:", "File:", "Template:", "User:")):
-                yield title
-        cont = payload.get("continue")
-        if not cont:
-            break
-        params.update(cont)
+def _category_pages(session, api, category, max_depth=2):
+    queue = [(category, 0)]
+    visited = set()
+    while queue:
+        current, depth = queue.pop(0)
+        if current.casefold() in visited:
+            continue
+        visited.add(current.casefold())
+        params = {
+            "action": "query", "list": "categorymembers",
+            "cmtitle": "Category:" + current,
+            "cmtype": "page|subcat", "cmlimit": "max", "format": "json",
+        }
+        while True:
+            payload = _get(session, api, params)
+            for item in payload.get("query", {}).get("categorymembers", []):
+                title = item.get("title", "")
+                if not title:
+                    continue
+                if item.get("ns") == 14 or title.startswith("Category:"):
+                    if depth < max_depth:
+                        queue.append((title.removeprefix("Category:"), depth + 1))
+                elif not title.startswith(("File:", "Template:", "User:")):
+                    yield title
+            cont = payload.get("continue")
+            if not cont:
+                break
+            params.update(cont)
+        time.sleep(0.1)
 
 def _extract_pages(session, api, titles):
     for offset in range(0, len(titles), 20):
@@ -143,7 +159,7 @@ def _orientation(extract):
             continue
         value = match.group(1).strip(" .;,*")
         labels = [x.casefold() for x in LABEL_RE.findall(value)]
-        if labels:
+        if labels and not re.search(r"\\b(?:not|never|non)\\s+(?:gay|lesbian|bisexual|pansexual|asexual|queer|homosexual)\\b", value, re.I):
             label = "; ".join(dict.fromkeys(labels))
             return label, f"Character page explicitly gives sexuality/orientation as {label}."
     return "Not stated", "Character discovered from a general-universe character category; page has no explicit orientation field."
