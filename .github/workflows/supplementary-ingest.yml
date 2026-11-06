@@ -1,0 +1,36 @@
+name: Ingest supplementary LGBTQ+ character sources
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/run-multisource-ingest"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supplementary-character-ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Fetch supplementary source candidates
+        run: python -m src.ingest_sources --source all
+      - name: Upload source-preserving candidate data
+        uses: actions/upload-artifact@v4
+        with:
+          name: supplementary-character-candidates-${{ github.run_number }}
+          path: data/raw/supplementary/*
+          if-no-files-found: error
+          retention-days: 90
