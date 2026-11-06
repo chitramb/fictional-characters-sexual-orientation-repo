@@ -33,6 +33,13 @@ PAGES = [
     "List_of_graphic_art_works_with_LGBTQ_characters",
     "List_of_video_games_with_LGBTQ_characters",
     "List_of_webcomics_with_LGBT_characters",
+    "List_of_LGBT_characters_in_film",
+    "List_of_LGBT_characters_in_television",
+    "List_of_LGBT_characters_in_animation",
+    "List_of_LGBT_characters_in_comics",
+    "List_of_transgender_fictional_characters",
+    "List_of_fictional_non-binary_characters",
+    "List_of_fictional_intersex_characters",
 ]
 HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.5 (research)"}
 YEAR_RE = re.compile(r"(?<!\d)(18\d{2}|19\d{2}|20\d{2})(?!\d)")
@@ -108,7 +115,8 @@ def scrape(output_dir: str | Path) -> list[dict]:
 
             char_idx = col_index(("character", "characters", "name"))
             work_idx = col_index(("title", "work", "show", "series", "novel", "game", "comic"))
-            identity_idx = col_index(("identity", "sexuality", "orientation", "gender"))
+            identity_idx = col_index(("sexuality", "orientation"))
+            gender_idx = col_index(("gender identity", "gender"))
             year_idx = col_index(("year", "date", "debut", "duration", "years"))
             country_idx = col_index(("country", "origin", "nation"))
             notes_idx = col_index(("notes", "description", "details"))
@@ -141,6 +149,11 @@ def scrape(output_dir: str | Path) -> list[dict]:
                         return cells[index].get_text(" ", strip=True) if index is not None and index < len(cells) else ""
 
                     identity = _orientation(page, cell_text(identity_idx))
+                    gender_identity = cell_text(gender_idx)
+                    page_lower = page.casefold()
+                    gender_only_page = any(token in page_lower for token in ("transgender", "non-binary", "intersex"))
+                    if gender_only_page and not cell_text(identity_idx):
+                        identity = "Not stated"
                     work = cell_text(work_idx)
                     if not work and len(cells) > 1:
                         work = " | ".join(c.get_text(" ", strip=True) for i, c in enumerate(cells) if i != char_idx)
@@ -152,6 +165,10 @@ def scrape(output_dir: str | Path) -> list[dict]:
                     country = cell_text(country_idx)
                     notes = cell_text(notes_idx)
                     reason = f"Listed as {identity} in the curated Wikipedia character list."
+                    if gender_identity:
+                        reason += f" Gender-identity field: {gender_identity}."
+                    elif gender_only_page:
+                        reason = f"Listed in a curated fictional-character list focused on {page.replace('_', ' ')}; sexual orientation is not stated."
                     if notes:
                         reason += " " + notes[:350]
                     records.append({
