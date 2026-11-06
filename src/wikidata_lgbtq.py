@@ -13,7 +13,7 @@ from pathlib import Path
 from .wikidata import query_wikidata, binding, normalize_binding
 
 GENDER_FILTER = "trans|non.?binary|agender|genderfluid|genderqueer|intersex"
-ORIENTATION_FILTER = "gay|lesbian|bisexual|pansexual|asexual|aromantic|queer|demisexual|graysexual|greysexual|polysexual|omnisexual|abrosexual|homosexual"
+ORIENTATION_FILTER = "heterosexual|straight|gay|lesbian|bisexual|pansexual|asexual|aromantic|queer|demisexual|graysexual|greysexual|polysexual|omnisexual|abrosexual|homosexual"
 
 WORK_CLASSES = [
     ("Q11424", "Film"), ("Q5398426", "TV"), ("Q526877", "TV"),
