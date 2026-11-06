@@ -8,7 +8,11 @@ Build a deduplicated repository of at least 15,000 fictional-character entities,
 
 ### Tier 1 — structured character/identity records
 - **Wikidata**: open structured entity graph. Use fictional-character subclasses, sexuality/identity statements, character-to-work links, work dates, and country of origin. Preserve the exact statement/property and QID. Do not rely on one sexuality property/value alone; inspect equivalent and more specific values and keep identity categories separate.
-- **LezWatch.TV**: public, no-key API with bulk character exports and sexuality-specific exports. Strong supplementary source for television characters, particularly queer women, trans and non-binary characters. Its documentation reports a database of thousands of characters; it is not a global all-media census. Observe its published rate limit (100 requests/IP/10 minutes). Store source URL, source ID, retrieval date, and original labels.
+- **LezWatch.TV**: public, no-key API with bulk character exports and sexuality-specific exports. Strong supplementary source for television characters, particularly queer women, trans and non-binary characters. Its public site reports roughly 7,450 character records and 2,290 shows; it is not a global all-media census. The complete export is ingested as candidate discovery; profile-level labels are retained separately from gender identity and orientation. Observe its published rate limit (100 requests/IP/10 minutes).
+- **Queer Comics Database**: series-level discovery index spanning print, web, independent and major-publisher comics. It catalogs titles, not a complete character-level identity list; use its series pages to discover individual characters and seek profile/issue-level evidence.
+- **AroAce Database**: specialist searchable compilation of aromantic and asexual fictional characters in prose fiction. Useful for named-character discovery and orientation cross-checking; verify each entry against cited sources.
+- **Queer SFF Database**: searchable bibliography of queer science-fiction and fantasy books with identity and relationship filters. Treat as work-level discovery and resolve individual character names from the books and independent references.
+- **Queerlit (Sweden)**: research bibliography and linked-data project indexing LGBTQI topics in Swedish fiction across historical periods. Valuable for non-English and historical European literature; it is primarily work/subject metadata, not a direct character roster.
 
 ### Tier 2 — curated candidate lists with references
 - **Wikipedia list pages**: lists of fictional gay, lesbian, bisexual, transgender and other LGBTQ+ characters; lists by medium and period; modern written fiction; animated series; TV and made-for-TV films. Use these to discover candidates and cited references, not as an unqualified identity authority. Each row must be linked to a cited source or explicitly marked as needing review.
@@ -47,6 +51,10 @@ A larger sample does not automatically become representative. The source ecosyst
 
 - Lezwatch API docs: https://docs.lezwatchtv.com/api/
 - LezWatch export endpoint docs: https://docs.lezwatchtv.com/api/global/export/
+- Queer Comics Database: https://queercomicsdatabase.com/
+- AroAce Database discovery portal: https://www.tulsalibrary.org/lgbt-recs
+- Queer SFF book database: https://queersff.theillustratedpage.net/
+- Queerlit project overview: https://ecp.ep.liu.se/index.php/hic/article/download/889/797/909
 - LezWatch character statistics docs: https://docs.lezwatchtv.com/api/statistics/characters/
 - Wikidata WikiProject LGBT models: https://www.wikidata.org/wiki/Wikidata:WikiProject_LGBT/Models
 - Wikipedia LGBTQ fiction lists: https://en.wikipedia.org/wiki/Lists_of_LGBTQ_figures_in_fiction_and_myth
