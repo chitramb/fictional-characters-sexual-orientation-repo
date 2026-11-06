@@ -168,5 +168,5 @@ def scrape(output_dir: str | Path) -> list[dict]:
 
     with (out / "wikipedia_list_candidates.jsonl").open("w", encoding="utf-8") as f:
         for record in records:
-            f.write(json.dumps(record, ensure_ascii=False) + "\\n")
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
     return records
