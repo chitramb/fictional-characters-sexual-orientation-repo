@@ -1,34 +1,86 @@
-"""Lean LezWatch.TV character candidate export."""
+"""LezWatch.TV bulk character ingestion using documented sexuality slugs.
+
+The API's taxonomy slugs are not the same as everyday labels (for example,
+"homosexual", "gay", and "lesbian" are not all valid endpoint slugs).
+"""
 from __future__ import annotations
+
 import json
+import re
 import time
 from pathlib import Path
 from typing import Any
+
 import requests
 
 BASE = "https://lezwatchtv.com/wp-json/lwtv/v1"
-TERMS = ("homosexual", "gay", "lesbian", "bisexual", "pansexual",
-         "queer", "asexual", "demisexual", "questioning", "unlabeled")
-HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.4 (research)"}
+# These are the documented taxonomy slugs exposed by /stats/characters/sexuality/.
+TERMS = ("asexual", "bisexual", "fluid", "homosexual", "pansexual", "queer", "unlabeled")
+HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.5 (open research)"}
+IDENTITY = {
+    "asexual": "asexual",
+    "bisexual": "bisexual",
+    "fluid": "fluid / sexually fluid",
+    "homosexual": "homosexual",
+    "pansexual": "pansexual",
+    "queer": "queer",
+    "unlabeled": "unlabeled",
+}
+PATTERNS = [
+    (re.compile(r"\basexual\b", re.I), "asexual"),
+    (re.compile(r"\bbisexual\b", re.I), "bisexual"),
+    (re.compile(r"\bpansexual\b", re.I), "pansexual"),
+    (re.compile(r"\bhomosexual\b|\bgay\b|\blesbian\b", re.I), "homosexual"),
+    (re.compile(r"\bsexually fluid\b|\bfluid sexuality\b", re.I), "fluid / sexually fluid"),
+    (re.compile(r"\bqueer\b", re.I), "queer"),
+]
 
 
 def get_json(url: str, session: requests.Session, attempts: int = 5) -> Any:
+    last_error = None
     for attempt in range(attempts):
-        response = session.get(url, timeout=(15, 90))
-        if response.status_code == 429 or response.status_code >= 500:
+        try:
+            response = session.get(url, timeout=(15, 90))
+            if response.status_code == 404:
+                return None
+            if response.status_code == 429 or response.status_code >= 500:
+                if attempt + 1 == attempts:
+                    response.raise_for_status()
+                delay = min(120, 10 * (2 ** attempt))
+                print(f"LezWatch HTTP {response.status_code}; retry in {delay}s", flush=True)
+                time.sleep(delay)
+                continue
+            response.raise_for_status()
+            return response.json()
+        except (requests.RequestException, ValueError) as exc:
+            last_error = exc
             if attempt + 1 == attempts:
-                response.raise_for_status()
-            delay = min(120, 10 * (2 ** attempt))
-            print(f"LezWatch HTTP {response.status_code}; retry in {delay}s", flush=True)
-            time.sleep(delay)
-            continue
-        response.raise_for_status()
-        return response.json()
-    raise RuntimeError(f"Unable to fetch {url}")
+                raise
+            time.sleep(min(120, 10 * (2 ** attempt)))
+    raise RuntimeError(f"Unable to fetch {url}: {last_error}")
+
+
+def _items(payload: Any):
+    if isinstance(payload, dict):
+        return payload.items()
+    if isinstance(payload, list):
+        return ((str(i), row) for i, row in enumerate(payload))
+    return ()
+
+
+def _orientation(labels: Any, description: str = "") -> str:
+    text = " ".join(map(str, labels)) if isinstance(labels, list) else str(labels or "")
+    if not text:
+        text = description
+    found = []
+    for pattern, label in PATTERNS:
+        if pattern.search(text) and label not in found:
+            found.append(label)
+    return "; ".join(found) if found else text.strip()
 
 
 def fetch_sexuality_export(output_dir: str | Path) -> list[dict]:
-    """Return only useful fields: name, work, medium, orientation, reason, source."""
+    """Collect character records across the API's documented sexuality categories."""
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
@@ -42,30 +94,61 @@ def fetch_sexuality_export(output_dir: str | Path) -> list[dict]:
         except (requests.RequestException, ValueError) as exc:
             print(f"LezWatch '{term}' unavailable: {exc}", flush=True)
             continue
-        items = payload.items() if isinstance(payload, dict) else (
-            (str(i), row) for i, row in enumerate(payload)
-        ) if isinstance(payload, list) else []
-        for source_id, item in items:
+        count = 0
+        for source_key, item in _items(payload):
             if not isinstance(item, dict):
                 continue
-            key = str(item.get("id") or source_id)
-            labels = item.get("sexuality") or [term]
-            label_text = ", ".join(map(str, labels)) if isinstance(labels, list) else str(labels)
-            record = merged.setdefault(key, {
+            source_id = str(item.get("id") or source_key)
+            labels = item.get("sexuality") or [IDENTITY[term]]
+            orientation = _orientation(labels)
+            if not orientation:
+                orientation = IDENTITY[term]
+            shows = item.get("shows") or []
+            work_names = [s.get("name", "") for s in shows if isinstance(s, dict) and s.get("name")]
+            source_url = item.get("url") or f"https://lezwatchtv.com/character/{source_key}/"
+            record = merged.setdefault(source_id, {
                 "character": item.get("name", ""),
-                "work": item.get("shows", []),
+                "work": "; ".join(dict.fromkeys(work_names)),
                 "medium": "TV",
-                "orientation": label_text,
-                "reason": f"LezWatch classifies this character under: {label_text}.",
-                "source": item.get("url") or url,
+                "orientation": orientation,
+                "reason": f"LezWatch character record explicitly lists: {orientation}.",
+                "source": source_url,
             })
-            if label_text not in record["orientation"]:
-                record["orientation"] += "; " + label_text
-                record["reason"] = f"LezWatch sexuality categories: {record['orientation']}."
-        print(f"LezWatch {term}: {len(merged):,} unique characters so far", flush=True)
+            if orientation not in record["orientation"]:
+                record["orientation"] += "; " + orientation
+                record["reason"] = f"LezWatch character record lists: {record['orientation']}."
+            if work_names and not record["work"]:
+                record["work"] = "; ".join(dict.fromkeys(work_names))
+            count += 1
+        print(f"LezWatch {term}: {count:,} rows; {len(merged):,} unique characters so far", flush=True)
         time.sleep(6)
 
-    records = list(merged.values())
+    # Fallback/coverage check: the documented complete character list can expose
+    # additional records if a taxonomy export slug changes or a term is omitted.
+    if not merged:
+        url = f"{BASE}/export/list/characters/"
+        try:
+            payload = get_json(url, session)
+            for source_key, item in _items(payload):
+                if not isinstance(item, dict):
+                    continue
+                description = str(item.get("description") or "")
+                orientation = _orientation("", description)
+                if not orientation:
+                    continue
+                source_id = str(item.get("id") or source_key)
+                merged[source_id] = {
+                    "character": item.get("name", ""),
+                    "work": "",
+                    "medium": "TV",
+                    "orientation": orientation,
+                    "reason": f"LezWatch character profile describes the character as {orientation}.",
+                    "source": f"https://lezwatchtv.com/character/{item.get('id') or source_key}/",
+                }
+        except (requests.RequestException, ValueError) as exc:
+            print(f"LezWatch complete-list fallback unavailable: {exc}", flush=True)
+
+    records = [r for r in merged.values() if r.get("character")]
     with (out / "lezwatch_characters.jsonl").open("w", encoding="utf-8") as f:
         for record in records:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
