@@ -201,6 +201,7 @@ def _orientation(extract):
 def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
+    checkpoint = out / "fandom_universe_candidates.jsonl"
     session = requests.Session()
     session.headers.update(HEADERS)
     records = {}
@@ -224,7 +225,7 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
                 title = page.get("title", "")
                 if not title:
                     continue
-                orientation, reason = _orientation(page.get("extract", ""))
+                orientation, reason = _orientation(page.get("wikitext", ""))
                 url = api.split("/api.php")[0] + "/wiki/" + quote(title.replace(" ", "_"))
                 records[(universe, title.casefold())] = {
                     "character": title,
@@ -239,8 +240,7 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
         except Exception as exc:
             print(f"Fandom {universe}: page extraction incomplete: {exc}", flush=True)
         print(f"Fandom {universe}: {sum(1 for k in records if k[0] == universe):,} extracted", flush=True)
-    result = list(records.values())
-    with (out / "fandom_universe_candidates.jsonl").open("w", encoding="utf-8") as handle:
-        for row in result:
-            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-    return result
+        with checkpoint.open("w", encoding="utf-8") as handle:
+            for row in records.values():
+                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return list(records.values())
