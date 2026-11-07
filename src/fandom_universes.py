@@ -122,7 +122,7 @@ def _character_categories(session, api):
             title = item.get("category") or item.get("*") or item.get("title", "")
             low = title.casefold()
             identity_category = re.search(
-                r"\b(lgbtq?|gay|lesbian|bisexual|pansexual|asexual|aromantic|queer|transgender|non.?binary|intersex)\b",
+                r"\b(lgbtq?|gay|lesbian|bisexual|pansexual|asexual|aromantic|queer|genderqueer|trans(?:gender)?|non.?binary|intersex|two.?spirit|sexual orientation|sexuality|gender identity)\b",
                 low,
             )
             if "character" in low and not identity_category:
