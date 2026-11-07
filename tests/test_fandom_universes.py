@@ -70,7 +70,7 @@ class MergeSemanticsTests(unittest.TestCase):
                 "evidence_status": "candidate",
             }
             (root / "wikidata_character_candidates.jsonl").write_text(
-                json.dumps(row) + "\\n", encoding="utf-8"
+                json.dumps(row) + "\n", encoding="utf-8"
             )
             summary = merge(root)
             merged = json.loads((root / "all_character_candidates.jsonl").read_text(encoding="utf-8"))
