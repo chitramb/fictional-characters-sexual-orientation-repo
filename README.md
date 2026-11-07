@@ -52,7 +52,7 @@ Results should be reported as “Wikidata-recorded characters” rather than tot
 ## Multi-source expansion (in progress)
 
 The original Wikidata extraction is retained as a strict, reproducible baseline. A separate supplementary ingestion path now uses a neutral, universe-first discovery strategy:
-- broad Wikidata character/work links with heterosexual and LGBTQ+ orientation labels, and gender identity kept separate;
+- broad Wikidata character/work links with orientation (P91) and sex/gender (P21) as optional, separate enrichment fields; gender identity is not inferred from P21;
 - general Fandom wikis for major fictional universes, discovering character pages from ordinary character categories and reading orientation only from explicit character-page infobox fields.
 
 Queer-specialist databases and LGBTQ-only character directories are excluded from the main candidate pool to avoid source-selection bias. Missing orientation remains “Not stated”; it is never inferred from plot, actors, relationships or the universe's reputation.
