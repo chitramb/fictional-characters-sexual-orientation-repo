@@ -27,6 +27,8 @@ jobs:
           cache: pip
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Run ingestion regression tests
+        run: python -m unittest discover -s tests -v
       - name: Fetch supplementary source candidates
         run: python -m src.ingest_sources --source all
       - name: Merge available checkpoints
