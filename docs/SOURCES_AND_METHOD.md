@@ -7,7 +7,7 @@ Build a broad, universe-first dictionary of at least 15,000 fictional-character 
 ## Source tiers
 
 ### Tier 1 — broad structured character/identity records
-- **Wikidata**: open structured entity graph. The broad extractor queries English labels attached to the sexual-orientation property (P91), including heterosexual orientations, and in a separate branch gender-identity property (P21), then joins characters to dated European-origin film, TV, book, comic and video-game works. Sexual orientation and gender identity remain separate; source statements and work links still need review.
+- **Wikidata**: neutral discovery begins with fictional-character entities linked to dated works across film, TV, books, comics and video games. Sexual orientation (P91) and sex/gender (P21) are optional enrichment fields; neither is a discovery filter. The two fields are retained separately. A P21 value is labelled as Wikidata sex/gender, not automatically interpreted as a trans identity. Country of origin is retained when available, but is not a filter at candidate-discovery stage.
 - **General-universe Fandom wikis**: character categories and character-page infoboxes from broad fictional universes (for example Harry Potter, Marvel, DC, Star Wars, Doctor Who, Middle-earth, Star Trek, Pokémon, Zelda and others). Universe inclusion is independent of LGBTQ status. Character orientation is recorded only from an explicit sexuality/orientation field; absent fields remain “Not stated”.
 
 ### Tier 2 — work metadata and cross-checks
@@ -30,7 +30,7 @@ A record is not analysis-ready merely because a name appears on a list. Preserve
 - work ID, title, medium, original country/countries, first publication/release year, and date precision;
 - entity-resolution decisions and duplicate/variant relationships.
 
-Use distinct statuses: `candidate`, `source-supported`, `independently-verified`, `disputed`, `excluded`. A curated list can seed a candidate but should not automatically promote it to verified.
+Use distinct statuses: `candidate`, `source-supported`, `independently-verified`, `disputed`, `excluded`. A curated list can seed a candidate but should not automatically promote it to verified. The current merged dictionary retains a list of source records per candidate; automated source extraction does not independently verify claims.
 
 ## Europe and historical dating
 
@@ -41,15 +41,3 @@ Store the earliest substantiated first publication/release date for the work, pl
 ## Bias and reporting
 
 A larger sample does not automatically become representative. The source ecosystem is uneven by geography, language, era, gender, medium, popularity, and the degree to which a character's identity is explicit. Report source coverage, evidence tiers, missingness, and sensitivity analyses. Never describe the resulting count as the actual number of LGBTQ+ characters in European culture.
-
-## Initial source references
-
-- Fictional Characters Wiki LGBTQ category: https://characters.fandom.com/wiki/Category:LGBT_Characters
-- LGBTQIA+ Characters Wikia: https://lgbtqia-characters.fandom.com/
-- Queer Comics Database: https://queercomicsdatabase.com/
-- AroAce Database discovery portal: https://www.tulsalibrary.org/lgbt-recs
-- Queer SFF book database: https://queersff.theillustratedpage.net/
-- Queerlit project overview: https://ecp.ep.liu.se/index.php/hic/article/download/889/797/909
-- Wikidata WikiProject LGBT models: https://www.wikidata.org/wiki/Wikidata:WikiProject_LGBT/Models
-- IMDb non-commercial data terms/docs: https://data.imdb.com/documentation
-- TMDB daily ID exports: https://developer.themoviedb.org/docs/daily-id-exports
