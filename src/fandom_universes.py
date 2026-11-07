@@ -84,9 +84,10 @@ UNIVERSES = [
 ]
 HEADERS = {"User-Agent": "EuropeanFictionalCharacterResearch/0.7 (universe-first open research)"}
 ORIENTATION_VALUES = (
-    "homosexual", "heterosexual", "straight", "bisexual", "pansexual", "asexual",
+    "homosexual", "homosexuality", "heterosexual", "heterosexuality", "straight",
+    "bisexual", "bisexuality", "pansexual", "pansexuality", "asexual", "asexuality",
     "demisexual", "graysexual", "greysexual", "queer", "lesbian", "gay",
-    "aromantic", "polysexual", "omnisexual", "abrosexual",
+    "aromantic", "aromanticism", "polysexual", "omnisexual", "abrosexual",
 )
 FIELD_RE = re.compile(
     r"(?im)^\s*\|\s*(?:sexuality|sexual\s+orientation)\s*=\s*(.*?)(?=\n\s*\||\n\s*\}\}|$)",
