@@ -27,3 +27,8 @@ Count unique character entities, not source rows or character/work appearances. 
 ## Identity-field semantics
 
 Wikidata property P21 is represented as `sex_or_gender`, not as `gender_identity`. P21 can describe sex or gender and does not, by itself, establish a character's self-identified gender identity. A `gender_identity` value should be populated only from a source that explicitly identifies the character's gender identity. Sexual orientation remains a separate field. Missing values remain `Not stated` and must not be interpreted as heterosexual or cisgender.
+
+
+## Work association scope
+
+The `work_scope` field distinguishes a character linked to a specific work from a character discovered in a broader franchise or universe category. Wikidata work-linked records are marked `specific_work`; Fandom universe-category discoveries are marked `universe`. Universe-level discovery is suitable for building a broad candidate dictionary, but it is not sufficient evidence that the character belongs to a particular title, first appeared in a particular adaptation, or qualifies for a work-level statistical sample.
