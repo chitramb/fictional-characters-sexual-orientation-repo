@@ -173,7 +173,7 @@ def _extract_pages(session, api, titles):
     for offset in range(0, len(titles), 20):
         batch = titles[offset:offset+20]
         params = {
-            "action": "query", "prop": "revisions", "rvprop": "ids|timestamp|content",
+            "action": "query", "prop": "revisions|pageprops", "rvprop": "ids|timestamp|content",
             "rvslots": "main", "titles": "|".join(batch), "format": "json",
         }
         payload = _get(session, api, params)
@@ -229,7 +229,7 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
         try:
             for page in _extract_pages(session, api, title_list):
                 title = page.get("title", "")
-                if not title:
+                if not title or "disambiguation" in page.get("pageprops", {}):
                     continue
                 orientation, reason = _orientation(page.get("wikitext", ""))
                 url = api.split("/api.php")[0] + "/wiki/" + quote(title.replace(" ", "_"))
