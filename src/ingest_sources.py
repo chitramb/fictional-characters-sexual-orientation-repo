@@ -21,7 +21,7 @@ def main() -> None:
         results["Wikidata character records"] = {
             "candidate_rows": len(records),
             "file": str(output / "wikidata_character_candidates.jsonl"),
-            "note": "Broad European-origin fiction discovery; sexual orientation P91 and gender identity P21 remain separate.",
+            "note": "Broad European-origin fiction discovery; sexual orientation P91 and sex/gender P21 remain separate; P21 is not treated as gender identity.",
         }
     if args.source in {"fandom", "all"}:
         records = scrape_fandom_universes(output)
