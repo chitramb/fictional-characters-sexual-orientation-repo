@@ -7,6 +7,10 @@ on:
   push:
     paths:
       - ".github/run-multisource-ingest"
+      - ".github/workflows/supplementary-ingest.yml"
+      - "src/**"
+      - "tests/**"
+      - "requirements.txt"
 
 permissions:
   contents: write
@@ -34,6 +38,14 @@ jobs:
       - name: Merge available checkpoints
         if: always()
         run: python -m src.merge_candidates
+      - name: Audit candidate corpus quality
+        if: always()
+        run: |
+          if [ -f data/processed/character_dictionary.jsonl ]; then
+            python -m src.audit_candidates
+          else
+            echo "No merged dictionary available for audit."
+          fi
       - name: Persist character dictionary to repository
         if: always()
         run: |
@@ -41,7 +53,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f data/processed/character_dictionary.jsonl ] && [ -f data/processed/collection_summary.json ]; then
             git pull --rebase origin main
-            git add -f data/processed/character_dictionary.jsonl data/processed/collection_summary.json
+            git add -f data/processed/character_dictionary.jsonl data/processed/collection_summary.json data/processed/quality_audit.json
             if ! git diff --cached --quiet; then
               git commit -m "Refresh universe-first fictional character dictionary"
               git push
@@ -54,6 +66,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: supplementary-character-candidates-${{ github.run_number }}
-          path: data/raw/supplementary/*
+          path: |
+            data/raw/supplementary/*
+            data/processed/quality_audit.json
           if-no-files-found: warn
           retention-days: 90
