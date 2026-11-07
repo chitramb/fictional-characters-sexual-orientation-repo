@@ -13,7 +13,7 @@ The expanded discovery corpus intentionally keeps only a few useful fields:
 | reason | One short sentence explaining why the orientation was assigned |
 | source | Direct URL to the supporting source |
 
-The LezWatch and Wikipedia candidate exports use these compact fields. A source that only suggests a candidate should be marked as such during review; a list-page URL is useful discovery provenance but is not always sufficient as final evidence. The character reference link in the Wikipedia file is a convenience for checking the entry, not a substitute for an identity citation.
+Legacy adapters for LezWatch, community LGBTQ+ archives, and LGBTQ+-themed Wikipedia lists remain in the repository for historical traceability only. They are not imported by `src/ingest_sources.py`, are excluded from the neutral candidate corpus, and must not be used as character-discovery inputs or counted in the research sample. The active discovery path uses general-universe character categories and broad work-linked structured data.
 
 ## Existing Wikidata baseline
 
