@@ -7,6 +7,7 @@ from unittest.mock import Mock
 
 from src.fandom_universes import _character_categories, _orientation
 from src.merge_candidates import merge
+from src.audit_candidates import audit
 
 
 class FandomOrientationTests(unittest.TestCase):
@@ -79,6 +80,27 @@ class MergeSemanticsTests(unittest.TestCase):
             self.assertEqual(merged["sources"][0]["source_revision_id"], 456)
             self.assertEqual(summary["records_with_sex_or_gender_value"], 1)
             self.assertEqual(summary["records_with_explicit_gender_identity"], 0)
+
+
+class CandidateAuditTests(unittest.TestCase):
+    def test_duplicate_names_are_flagged_not_collapsed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rows = [
+                {"character": "Alex", "work": "Universe A", "work_scope": "universe",
+                 "orientation": "Not stated", "sex_or_gender": "Not stated",
+                 "gender_identity": "Not stated", "sources": [{"source_name": "Fandom:A"}]},
+                {"character": " Alex ", "work": "Universe B", "work_scope": "universe",
+                 "orientation": "Not stated", "sex_or_gender": "Not stated",
+                 "gender_identity": "Not stated", "sources": [{"source_name": "Fandom:B"}]},
+            ]
+            source = root / "dictionary.jsonl"
+            source.write_text("".join(json.dumps(row) + "\\n" for row in rows), encoding="utf-8")
+            report = audit(source, root / "quality_audit.json")
+            self.assertEqual(report["candidate_records"], 2)
+            self.assertEqual(report["distinct_normalized_character_names"], 1)
+            self.assertEqual(report["duplicate_name_groups_not_automatically_merged"], 1)
+            self.assertEqual(report["same_name_across_multiple_work_or_universe_labels"], 1)
 
 
 if __name__ == "__main__":
