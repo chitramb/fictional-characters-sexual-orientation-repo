@@ -1,8 +1,12 @@
 """Regression tests for neutral Fandom discovery and explicit-only identity parsing."""
+import json
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import Mock
 
 from src.fandom_universes import _character_categories, _orientation
+from src.merge_candidates import merge
 
 
 class FandomOrientationTests(unittest.TestCase):
@@ -45,6 +49,36 @@ class FandomOrientationTests(unittest.TestCase):
         self.assertIn("Minor characters", categories)
         self.assertIn("Female characters", categories)
         self.assertNotIn("Bisexual characters", categories)
+
+
+class MergeSemanticsTests(unittest.TestCase):
+    def test_p21_semantics_and_explicit_gender_identity_remain_separate(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            row = {
+                "character": "Example Character",
+                "work": "Example Work",
+                "medium": "Book",
+                "orientation": "Not stated",
+                "sex_or_gender": "female",
+                "gender_identity": "Not stated",
+                "source": "https://www.wikidata.org/wiki/Q123",
+                "source_id": "Q123",
+                "source_name": "Wikidata",
+                "source_revision_id": 456,
+                "source_revision_timestamp": "2026-01-01T00:00:00Z",
+                "evidence_status": "candidate",
+            }
+            (root / "wikidata_character_candidates.jsonl").write_text(
+                json.dumps(row) + "\\n", encoding="utf-8"
+            )
+            summary = merge(root)
+            merged = json.loads((root / "all_character_candidates.jsonl").read_text(encoding="utf-8"))
+            self.assertEqual(merged["sex_or_gender"], "female")
+            self.assertEqual(merged["gender_identity"], "Not stated")
+            self.assertEqual(merged["sources"][0]["source_revision_id"], 456)
+            self.assertEqual(summary["records_with_sex_or_gender_value"], 1)
+            self.assertEqual(summary["records_with_explicit_gender_identity"], 0)
 
 
 if __name__ == "__main__":
