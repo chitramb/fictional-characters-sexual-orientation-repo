@@ -1,0 +1,28 @@
+{
+  "source_rows": {
+    "wikidata_character_candidates": 0,
+    "fandom_universe_candidates": 219671
+  },
+  "merged_candidate_records": 219671,
+  "distinct_character_names": 217769,
+  "records_with_explicit_orientation": 0,
+  "orientation_counts": {
+    "Not stated": 219671
+  },
+  "medium_counts": {
+    "Book/film": 1433,
+    "Comics/film/TV": 148842,
+    "Film/TV/books": 15733,
+    "TV": 15248,
+    "Book/film/TV": 1318,
+    "TV/film": 878,
+    "Comics/TV": 8325,
+    "Animation": 1402,
+    "Animation/game": 10447,
+    "Animation/manga": 8257,
+    "Video game": 7788
+  },
+  "output": "data/raw/supplementary/all_character_candidates.jsonl",
+  "note": "General-universe candidate dictionary; records still require entity resolution, source review, and Europe eligibility checks.",
+  "persistent_dictionary": "/home/runner/work/fictional-characters-sexual-orientation-repo/fictional-characters-sexual-orientation-repo/data/processed/character_dictionary.jsonl"
+}
