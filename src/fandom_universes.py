@@ -184,6 +184,8 @@ def _extract_pages(session, api, titles):
             revision = revisions[0]
             main = revision.get("slots", {}).get("main", {})
             page["wikitext"] = main.get("*") or main.get("content") or revision.get("*") or ""
+            page["source_revision_id"] = revision.get("revid")
+            page["source_revision_timestamp"] = revision.get("timestamp")
             yield page
         time.sleep(0.15)
 
