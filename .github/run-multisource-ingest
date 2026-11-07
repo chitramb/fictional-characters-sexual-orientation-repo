@@ -1,1 +1,5 @@
-Neutral universe-first collection only. Refresh broad Wikidata character/work discovery with optional identity enrichment; preserve Fandom candidates and source provenance. Exclude queer-specialist discovery sources.
+Neutral ingestion refresh 2026-11-07T06:30:56.164Z
+
+Re-run after expanding general Fandom category coverage, adding page revision provenance,
+separating Wikidata P21 sex/gender from explicitly sourced gender identity, adding regression
+tests, and preserving universe-level versus specific-work association scope.
