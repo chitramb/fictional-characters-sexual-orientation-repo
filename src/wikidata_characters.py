@@ -60,7 +60,7 @@ def _record(row: dict) -> dict | None:
         "year": int(date[:4]),
         "country": binding(row, "countryLabel"),
         "orientation": orientation,
-        "gender_identity": gender,
+        "sex_or_gender": gender,
         "reason": " ".join(evidence) if evidence else "Neutral character/work link; no P91 or P21 value returned.",
         "source": f"https://www.wikidata.org/wiki/{qid}",
         "source_id": qid,
