@@ -20,6 +20,7 @@ def _source_entry(row: dict, source_fallback: str) -> dict:
         "evidence_status": row.get("evidence_status", "candidate"),
         "orientation": row.get("orientation", "Not stated"),
         "sex_or_gender": row.get("sex_or_gender", "Not stated"),
+        "gender_identity": row.get("gender_identity", "Not stated"),
         "reason": row.get("reason", ""),
     }
 
@@ -58,6 +59,7 @@ def merge(output_dir: str | Path) -> dict:
                         "year": year, "country": row.get("country", ""),
                         "orientation": row.get("orientation", "Not stated"),
                         "sex_or_gender": row.get("sex_or_gender", "Not stated"),
+                        "gender_identity": row.get("gender_identity", "Not stated"),
                         "reason": row.get("reason", ""),
                         "source": row.get("source", ""),
                         "source_id": source_id,
@@ -74,7 +76,7 @@ def merge(output_dir: str | Path) -> dict:
                         current["orientation"] = row["orientation"]
                         current["reason"] = row.get("reason", current["reason"])
                     if current.get("sex_or_gender") in ("", "Not stated") and row.get("sex_or_gender") not in ("", "Not stated"):
-                        current["sex_or_gender"] = row["gender_identity"]
+                        current["sex_or_gender"] = row["sex_or_gender"]
                     if entry not in current["sources"]:
                         current["sources"].append(entry)
                 count += 1
@@ -99,9 +101,9 @@ def merge(output_dir: str | Path) -> dict:
         "merged_candidate_records": len(merged),
         "distinct_character_names": len({norm(row["character"]) for row in merged.values()}),
         "records_with_explicit_orientation": sum(1 for row in merged.values() if row.get("orientation") not in ("", "Not stated")),
-        "records_with_gender_value": sum(1 for row in merged.values() if row.get("sex_or_gender") not in ("", "Not stated")),
+        "records_with_sex_or_gender_value": sum(1 for row in merged.values() if row.get("sex_or_gender") not in ("", "Not stated")),
         "orientation_counts": orientation_counts,
-        "sex_or_sex_or_gender_counts": sex_or_gender_counts,
+        "sex_or_gender_counts": sex_or_gender_counts,
         "medium_counts": medium_counts,
         "output": str(output),
         "note": "Neutral discovery candidates. Source evidence is preserved per record; entity resolution, source review, and Europe eligibility remain separate steps.",
