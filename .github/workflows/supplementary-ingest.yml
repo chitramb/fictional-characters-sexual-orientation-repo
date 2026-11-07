@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: supplementary-character-ingestion-v2
+  group: supplementary-character-ingestion-v3
   cancel-in-progress: false
 
 jobs:
