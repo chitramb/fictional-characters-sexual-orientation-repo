@@ -1,16 +1,24 @@
-"""Conservatively merge supplementary discovery candidates."""
+"""Merge neutral character candidates while preserving source-level provenance."""
 from __future__ import annotations
 import json
 import re
 from pathlib import Path
 
-FILES = (
-    "wikidata_character_candidates.jsonl",
-    "fandom_universe_candidates.jsonl",
-)
+FILES = ("wikidata_character_candidates.jsonl", "fandom_universe_candidates.jsonl")
 
 def norm(value: str) -> str:
     return re.sub(r"\s+", " ", (value or "").strip()).casefold()
+
+def _source_entry(row: dict, source_fallback: str) -> dict:
+    return {
+        "source_name": row.get("source_name") or source_fallback,
+        "source": row.get("source", ""),
+        "source_id": row.get("source_id", ""),
+        "evidence_status": row.get("evidence_status", "candidate"),
+        "orientation": row.get("orientation", "Not stated"),
+        "gender_identity": row.get("gender_identity", "Not stated"),
+        "reason": row.get("reason", ""),
+    }
 
 def merge(output_dir: str | Path) -> dict:
     root = Path(output_dir)
@@ -33,52 +41,67 @@ def merge(output_dir: str | Path) -> dict:
                     continue
                 work = str(row.get("work") or "").strip()
                 medium = str(row.get("medium") or "").strip()
-                # Work-qualified keys avoid collapsing unrelated characters
-                # with common names; blank-work records use source-independent
-                # name + medium and remain candidates for manual resolution.
-                key = (norm(name), norm(work) if work else "", norm(medium) if not work else "")
+                year = row.get("year")
+                # A source-qualified entity ID is preferred. Work-qualified names
+                # are fallback candidates, not final entity resolution.
+                source_id = str(row.get("source_id") or "").strip()
+                key = (source_id, norm(work), norm(medium), year) if source_id else (
+                    norm(name), norm(work) if work else "", norm(medium) if not work else ""
+                )
+                entry = _source_entry(row, source)
                 if key not in merged:
                     merged[key] = {
-                        "character": name,
-                        "work": work,
-                        "medium": medium,
-                        "year": row.get("year"),
-                        "country": row.get("country", ""),
+                        "character": name, "work": work, "medium": medium,
+                        "year": year, "country": row.get("country", ""),
                         "orientation": row.get("orientation", "Not stated"),
+                        "gender_identity": row.get("gender_identity", "Not stated"),
                         "reason": row.get("reason", ""),
                         "source": row.get("source", ""),
+                        "source_id": source_id,
+                        "evidence_status": row.get("evidence_status", "candidate"),
+                        "sources": [entry],
                     }
                 else:
                     current = merged[key]
-                    if not current.get("year") and row.get("year"):
-                        current["year"] = row["year"]
+                    if not current.get("year") and year:
+                        current["year"] = year
                     if not current.get("country") and row.get("country"):
                         current["country"] = row["country"]
                     if current.get("orientation") in ("", "Not stated") and row.get("orientation") not in ("", "Not stated"):
                         current["orientation"] = row["orientation"]
                         current["reason"] = row.get("reason", current["reason"])
+                    if current.get("gender_identity") in ("", "Not stated") and row.get("gender_identity") not in ("", "Not stated"):
+                        current["gender_identity"] = row["gender_identity"]
+                    if entry not in current["sources"]:
+                        current["sources"].append(entry)
                 count += 1
         source_rows[source] = count
+
     output = root / "all_character_candidates.jsonl"
     with output.open("w", encoding="utf-8") as handle:
         for row in merged.values():
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
-    orientations = {}
-    media = {}
+
+    orientation_counts, gender_counts, medium_counts = {}, {}, {}
     for row in merged.values():
-        label = row.get("orientation") or "Not stated"
-        orientations[label] = orientations.get(label, 0) + 1
+        orientation = row.get("orientation") or "Not stated"
+        gender = row.get("gender_identity") or "Not stated"
         medium = row.get("medium") or "Unclassified"
-        media[medium] = media.get(medium, 0) + 1
+        orientation_counts[orientation] = orientation_counts.get(orientation, 0) + 1
+        gender_counts[gender] = gender_counts.get(gender, 0) + 1
+        medium_counts[medium] = medium_counts.get(medium, 0) + 1
+
     summary = {
         "source_rows": source_rows,
         "merged_candidate_records": len(merged),
         "distinct_character_names": len({norm(row["character"]) for row in merged.values()}),
         "records_with_explicit_orientation": sum(1 for row in merged.values() if row.get("orientation") not in ("", "Not stated")),
-        "orientation_counts": orientations,
-        "medium_counts": media,
+        "records_with_gender_value": sum(1 for row in merged.values() if row.get("gender_identity") not in ("", "Not stated")),
+        "orientation_counts": orientation_counts,
+        "gender_identity_counts": gender_counts,
+        "medium_counts": medium_counts,
         "output": str(output),
-        "note": "General-universe candidate dictionary; records still require entity resolution, source review, and Europe eligibility checks.",
+        "note": "Neutral discovery candidates. Source evidence is preserved per record; entity resolution, source review, and Europe eligibility remain separate steps.",
     }
     (root / "merge_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     project_root = Path(__file__).resolve().parents[1]
@@ -90,7 +113,6 @@ def merge(output_dir: str | Path) -> dict:
     summary["persistent_dictionary"] = str(dictionary_path)
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return summary
-
 
 if __name__ == "__main__":
     import argparse
