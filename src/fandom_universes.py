@@ -89,8 +89,7 @@ ORIENTATION_VALUES = (
     "aromantic", "polysexual", "omnisexual", "abrosexual",
 )
 FIELD_RE = re.compile(
-    r"(?:sexuality|sexual orientation)\s*[:=]\s*([^|}\n<]{2,80})",
-    re.I,
+    r"(?im)^\s*\|\s*(?:sexuality|sexual\s+orientation)\s*=\s*(.*?)(?=\n\s*\||\n\s*\}\}|$)",
 )
 LABEL_RE = re.compile(
     r"\b(" + "|".join(map(re.escape, ORIENTATION_VALUES)) + r")\b", re.I
@@ -126,14 +125,18 @@ def _character_categories(session, api):
                 low,
             )
             if "character" in low and not identity_category:
-                found.append(title)
+                found.append((title, int(item.get("size", 0) or 0)))
         cont = payload.get("continue")
         if not cont:
             break
         params.update(cont)
-    # Prioritize the broad category itself and then subcategories with likely character pages.
-    return sorted(set(found), key=lambda x: (0 if x.casefold() in
-                   ("characters", "fictional characters", "main characters") else 1, x.casefold()))[:100]
+    # Prioritize broad categories, then the largest ordinary character categories.
+    # An alphabetical cap discarded most useful categories in large wikis.
+    unique = {name: size for name, size in found}
+    ordered = sorted(unique.items(), key=lambda item: (
+        0 if item[0].casefold() in ("characters", "fictional characters", "main characters") else 1,
+        -item[1], item[0].casefold()))
+    return [name for name, _ in ordered[:300]]
 
 def _category_pages(session, api, category, max_depth=2):
     queue = [(category, 0)]
@@ -169,7 +172,7 @@ def _extract_pages(session, api, titles):
     for offset in range(0, len(titles), 20):
         batch = titles[offset:offset+20]
         params = {
-            "action": "query", "prop": "revisions", "rvprop": "content",
+            "action": "query", "prop": "revisions", "rvprop": "ids|timestamp|content",
             "rvslots": "main", "titles": "|".join(batch), "format": "json",
         }
         payload = _get(session, api, params)
@@ -187,15 +190,15 @@ def _extract_pages(session, api, titles):
 def _orientation(extract):
     # Only accept an explicit infobox-like field, never an isolated identity word
     # somewhere in plot text, cast details, or an actor's biography.
-    for line in extract.splitlines():
-        match = FIELD_RE.search(line)
-        if not match:
-            continue
+    for match in FIELD_RE.finditer(extract):
         value = match.group(1).strip(" .;,*")
+        value = re.sub(r"\[\[([^]|]+)(?:\|([^]]+))?\]\]", lambda m: m.group(2) or m.group(1), value)
+        value = re.sub(r"\{\{[^{}]*\}\}", " ", value)
+        value = re.sub(r"<[^>]+>", " ", value)
         labels = [x.casefold() for x in LABEL_RE.findall(value)]
         if labels and not re.search(r"\b(?:not|never|non)\s+(?:gay|lesbian|bisexual|pansexual|asexual|queer|homosexual)\b", value, re.I):
             label = "; ".join(dict.fromkeys(labels))
-            return label, f"Character page explicitly gives sexuality/orientation as {label}."
+            return label, f"Character page explicitly gives sexuality/orientation as {label}; field value: {value[:160]}."
     return "Not stated", "Character discovered from a general-universe character category; page has no explicit orientation field."
 
 def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
@@ -229,6 +232,10 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
                 url = api.split("/api.php")[0] + "/wiki/" + quote(title.replace(" ", "_"))
                 records[(universe, title.casefold())] = {
                     "character": title,
+                    "source_name": f"Fandom:{universe}",
+                    "source_id": f"fandom:{universe.casefold()}:{page.get(\"pageid\", title.casefold())}",
+                    "source_revision_id": revision.get("revid"),
+                    "source_retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                     "work": work,
                     "medium": medium,
                     "year": None,
@@ -236,6 +243,7 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
                     "orientation": orientation,
                     "reason": reason,
                     "source": url,
+                    "evidence_status": "candidate",
                 }
         except Exception as exc:
             print(f"Fandom {universe}: page extraction incomplete: {exc}", flush=True)
