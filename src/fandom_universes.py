@@ -95,6 +95,9 @@ FIELD_RE = re.compile(
 LABEL_RE = re.compile(
     r"\b(" + "|".join(map(re.escape, ORIENTATION_VALUES)) + r")\b", re.I
 )
+NEGATED_LABEL_RE = re.compile(
+    r"\b(?:not|never|non|no)[\s-]+(?:" + "|".join(map(re.escape, ORIENTATION_VALUES)) + r")\b", re.I
+)
 
 def _get(session, api, params, attempts=4):
     for attempt in range(attempts):
