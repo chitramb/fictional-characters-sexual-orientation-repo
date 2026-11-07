@@ -55,7 +55,9 @@ def merge(output_dir: str | Path) -> dict:
                 entry = _source_entry(row, source)
                 if key not in merged:
                     merged[key] = {
-                        "character": name, "work": work, "medium": medium,
+                        "character": name, "work": work,
+                        "work_scope": row.get("work_scope", "specific_work" if source == "wikidata_character_candidates" else "unspecified"),
+                        "medium": medium,
                         "year": year, "country": row.get("country", ""),
                         "orientation": row.get("orientation", "Not stated"),
                         "sex_or_gender": row.get("sex_or_gender", "Not stated"),
@@ -68,6 +70,8 @@ def merge(output_dir: str | Path) -> dict:
                     }
                 else:
                     current = merged[key]
+                    if current.get("work_scope") in ("", "unspecified") and row.get("work_scope"):
+                        current["work_scope"] = row["work_scope"]
                     if not current.get("year") and year:
                         current["year"] = year
                     if not current.get("country") and row.get("country"):
