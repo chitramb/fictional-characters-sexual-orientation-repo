@@ -34,6 +34,8 @@ class FandomOrientationTests(unittest.TestCase):
                 "allcategories": [
                     {"category": "Characters", "size": 50},
                     {"category": "Bisexual characters", "size": 500},
+                    {"category": "Genderqueer characters", "size": 450},
+                    {"category": "Characters by sexual orientation", "size": 420},
                     {"category": "Minor characters", "size": 400},
                     {"category": "Female characters", "size": 300},
                 ]
@@ -50,6 +52,8 @@ class FandomOrientationTests(unittest.TestCase):
         self.assertIn("Minor characters", categories)
         self.assertIn("Female characters", categories)
         self.assertNotIn("Bisexual characters", categories)
+        self.assertNotIn("Genderqueer characters", categories)
+        self.assertNotIn("Characters by sexual orientation", categories)
 
 
 class MergeSemanticsTests(unittest.TestCase):
