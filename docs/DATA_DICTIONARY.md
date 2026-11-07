@@ -22,3 +22,8 @@ The legacy `character_work_records.csv` and `yearly_counts.csv` remain available
 ## Counting and deduplication
 
 Count unique character entities, not source rows or character/work appearances. Merge obvious aliases and repeated source entries. Do not merge distinct adaptations or separate characters solely because they share a name. If a reliable canonical ID is unavailable, use a source-qualified ID internally; the public-facing table can remain concise.
+
+
+## Identity-field semantics
+
+Wikidata property P21 is represented as `sex_or_gender`, not as `gender_identity`. P21 can describe sex or gender and does not, by itself, establish a character's self-identified gender identity. A `gender_identity` value should be populated only from a source that explicitly identifies the character's gender identity. Sexual orientation remains a separate field. Missing values remain `Not stated` and must not be interpreted as heterosexual or cisgender.
