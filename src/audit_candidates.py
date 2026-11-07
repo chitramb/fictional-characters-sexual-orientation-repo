@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 def normalize(value: str) -> str:
-    return re.sub(r"\\s+", " ", (value or "").strip()).casefold()
+    return re.sub(r"\s+", " ", (value or "").strip()).casefold()
 
 
 def audit(dictionary_path: str | Path, output_path: str | Path) -> dict:
