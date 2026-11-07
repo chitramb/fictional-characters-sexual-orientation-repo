@@ -137,9 +137,9 @@ def _character_categories(session, api):
     ordered = sorted(unique.items(), key=lambda item: (
         0 if item[0].casefold() in ("characters", "fictional characters", "main characters") else 1,
         -item[1], item[0].casefold()))
-    return [name for name, _ in ordered[:300]]
+    return [name for name, _ in ordered[:120]]
 
-def _category_pages(session, api, category, max_depth=2):
+def _category_pages(session, api, category, max_depth=1):
     queue = [(category, 0)]
     visited = set()
     while queue:
