@@ -95,7 +95,7 @@ class CandidateAuditTests(unittest.TestCase):
                  "gender_identity": "Not stated", "sources": [{"source_name": "Fandom:B"}]},
             ]
             source = root / "dictionary.jsonl"
-            source.write_text("".join(json.dumps(row) + "\\n" for row in rows), encoding="utf-8")
+            source.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
             report = audit(source, root / "quality_audit.json")
             self.assertEqual(report["candidate_records"], 2)
             self.assertEqual(report["distinct_normalized_character_names"], 1)
