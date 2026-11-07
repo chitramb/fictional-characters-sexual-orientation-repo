@@ -56,6 +56,7 @@ def _record(row: dict) -> dict | None:
     return {
         "character": binding(row, "characterLabel"),
         "work": binding(row, "workLabel"),
+        "work_scope": "specific_work",
         "medium": binding(row, "medium"),
         "year": int(date[:4]),
         "country": binding(row, "countryLabel"),
