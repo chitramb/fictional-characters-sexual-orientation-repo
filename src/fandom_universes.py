@@ -238,7 +238,7 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
             return
         with partial_checkpoint.open("a", encoding="utf-8") as handle:
             for row in pending:
-                handle.write(json.dumps(row, ensure_ascii=False) + "\\n")
+                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
         pending.clear()
         print(f"Fandom: durable checkpoint now contains {len(records):,} page records", flush=True)
 
