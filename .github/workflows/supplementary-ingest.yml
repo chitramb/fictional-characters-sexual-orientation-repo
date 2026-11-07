@@ -37,7 +37,12 @@ jobs:
         run: python -m src.ingest_sources --source all
       - name: Merge available checkpoints
         if: always()
-        run: python -m src.merge_candidates
+        run: |
+          if [ -f data/raw/supplementary/wikidata_character_candidates.jsonl ] || [ -f data/raw/supplementary/fandom_universe_candidates.jsonl ]; then
+            python -m src.merge_candidates
+          else
+            echo "No source checkpoints available to merge."
+          fi
       - name: Audit candidate corpus quality
         if: always()
         run: |
