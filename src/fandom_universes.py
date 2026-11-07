@@ -239,6 +239,7 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
                     "source_revision_id": revision.get("revid"),
                     "source_retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                     "work": work,
+                    "work_scope": "universe",
                     "medium": medium,
                     "year": None,
                     "country": "",
