@@ -208,12 +208,40 @@ def _orientation(extract):
     return "Not stated", "Character discovered from a general-universe character category; page has no explicit orientation field."
 
 def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
+    """Collect candidates with durable incremental checkpoints.
+
+    A partial JSONL is flushed every 100 pages so an interrupted Actions runner
+    does not lose all work from a large universe. A later run reuses those rows.
+    """
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     checkpoint = out / "fandom_universe_candidates.jsonl"
+    partial_checkpoint = out / "fandom_universe_candidates.partial.jsonl"
     session = requests.Session()
     session.headers.update(HEADERS)
     records = {}
+    if partial_checkpoint.exists():
+        with partial_checkpoint.open(encoding="utf-8") as handle:
+            for line in handle:
+                try:
+                    row = json.loads(line)
+                    key = (row.get("source_name", ""), row.get("source_id", ""))
+                    if key[1]:
+                        records[key] = row
+                except (json.JSONDecodeError, TypeError):
+                    continue
+        print(f"Fandom: resumed {len(records):,} durable page checkpoints", flush=True)
+
+    pending = []
+    def flush_pending():
+        if not pending:
+            return
+        with partial_checkpoint.open("a", encoding="utf-8") as handle:
+            for row in pending:
+                handle.write(json.dumps(row, ensure_ascii=False) + "\\n")
+        pending.clear()
+        print(f"Fandom: durable checkpoint now contains {len(records):,} page records", flush=True)
+
     for universe, api, medium, work in UNIVERSES:
         try:
             categories = _character_categories(session, api)
@@ -229,17 +257,22 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
             time.sleep(0.1)
         title_list = sorted(titles)
         print(f"Fandom {universe}: {len(title_list):,} character-page candidates from {len(categories)} general categories", flush=True)
+        extracted = 0
         try:
             for page in _extract_pages(session, api, title_list):
                 title = page.get("title", "")
                 if not title or "disambiguation" in page.get("pageprops", {}):
                     continue
+                source_id = f"fandom:{universe.casefold()}:{page.get('pageid', title.casefold())}"
+                key = (f"Fandom:{universe}", source_id)
+                if key in records:
+                    continue
                 orientation, reason = _orientation(page.get("wikitext", ""))
                 url = api.split("/api.php")[0] + "/wiki/" + quote(title.replace(" ", "_"))
-                records[(universe, title.casefold())] = {
+                row = {
                     "character": title,
                     "source_name": f"Fandom:{universe}",
-                    "source_id": f"fandom:{universe.casefold()}:{page.get('pageid', title.casefold())}",
+                    "source_id": source_id,
                     "source_revision_id": page.get("source_revision_id"),
                     "source_revision_timestamp": page.get("source_revision_timestamp"),
                     "source_retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -253,10 +286,17 @@ def scrape_fandom_universes(output_dir: str | Path) -> list[dict]:
                     "source": url,
                     "evidence_status": "candidate",
                 }
+                records[key] = row
+                pending.append(row)
+                extracted += 1
+                if len(pending) >= 100:
+                    flush_pending()
         except Exception as exc:
             print(f"Fandom {universe}: page extraction incomplete: {exc}", flush=True)
-        print(f"Fandom {universe}: {sum(1 for k in records if k[0] == universe):,} extracted", flush=True)
-        with checkpoint.open("w", encoding="utf-8") as handle:
-            for row in records.values():
-                handle.write(json.dumps(row, ensure_ascii=False) + "\n")
+        flush_pending()
+        print(f"Fandom {universe}: {extracted:,} newly extracted; {sum(1 for k in records if k[0] == f'Fandom:{universe}'):,} total saved", flush=True)
+
+    flush_pending()
+    if partial_checkpoint.exists():
+        partial_checkpoint.replace(checkpoint)
     return list(records.values())
