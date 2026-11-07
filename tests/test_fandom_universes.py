@@ -29,7 +29,7 @@ class FandomOrientationTests(unittest.TestCase):
         self.assertEqual(value, "Not stated")
 
     def test_negated_orientation_label_is_not_classified(self):
-        value, _ = _orientation("{{Character\\n| sexuality = Not aromantic\\n| age = 30\\n}}")
+        value, _ = _orientation("{{Character\n| sexuality = Not aromantic\n| age = 30\n}}")
         self.assertEqual(value, "Not stated")
 
     def test_general_character_categories_exclude_identity_directories(self):
