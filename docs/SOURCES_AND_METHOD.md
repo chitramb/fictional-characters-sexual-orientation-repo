@@ -2,7 +2,7 @@
 
 ## Research target
 
-Build a broad, universe-first dictionary of at least 15,000 fictional-character entities, with source-level evidence and work links. Character discovery is not filtered by LGBTQ status: orientation is recorded when explicit evidence exists and otherwise remains Not stated. This is a collection target, not a promise that 15,000 records will pass final evidence and Europe/medium filters. Report raw candidates, distinct names, work-qualified candidates, resolved entities, verified orientation statements, and Europe-eligible records separately.
+Build a broad, universe-first dictionary of at least 12,000 fictional-character entities, with source-level evidence and work links. Character discovery is not filtered by LGBTQ status: orientation is recorded when explicit evidence exists and otherwise remains Not stated. This is a collection target, not a promise that 12,000 records will pass final evidence and Europe/medium filters. Report raw candidates, distinct names, work-qualified candidates, resolved entities, verified orientation statements, and Europe-eligible records separately.
 
 ## Source tiers
 
