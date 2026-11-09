@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: supplementary-character-ingestion-v3
+  group: supplementary-character-fandom-firstntary-character-ingestion-v3
   cancel-in-progress: false
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
       - name: Run ingestion regression tests
         run: python -m unittest discover -s tests -v
       - name: Fetch supplementary source candidates
-        run: python -m src.ingest_sources --source all
+        run: python -m src.ingest_sources --source fandom
       - name: Merge available checkpoints
         if: always()
         run: |
@@ -57,10 +57,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -f data/processed/character_dictionary.jsonl ] && [ -f data/processed/collection_summary.json ]; then
-            git pull --rebase origin main
             git add -f data/processed/character_dictionary.jsonl data/processed/collection_summary.json data/processed/quality_audit.json
             if ! git diff --cached --quiet; then
               git commit -m "Refresh universe-first fictional character dictionary"
+              git pull --rebase origin main
               git push
             fi
           else
